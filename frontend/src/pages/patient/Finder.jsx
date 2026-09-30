@@ -1,0 +1,14 @@
+import { useState } from "react";
+import { api } from "../../api.js";
+import Icon from "../../components/Icon.jsx";
+
+export default function PatientFinder() {
+  const [symptoms,setSymptoms]=useState(""); const [result,setResult]=useState(null); const [error,setError]=useState(""); const [loading,setLoading]=useState(false);
+  async function run(){if(!symptoms.trim())return;setLoading(true);setError("");setResult(null);try{setResult(await api.aiNavigate(symptoms,"Entrance"))}catch(e){setError(e.message)}finally{setLoading(false)}}
+  return <div className="app-feature-page inner-page"><div className="feature-page-header"><div><span className="feature-eyebrow">AI Assistance</span><h1>Find the Right Department</h1><p>Describe your symptoms and the demo AI will suggest a hospital department and route.</p></div><div className="feature-round-icon"><Icon name="spark" size={24}/></div></div>
+    <div className="finder-layout"><section className="feature-card"><div className="feature-card-title"><Icon name="spark" size={18}/><h2>Describe your symptoms</h2></div><textarea className="finder-textarea" value={symptoms} onChange={e=>setSymptoms(e.target.value)} maxLength={500} rows={6} placeholder="Example: I have knee pain and swelling after walking..."/><div className="finder-footer"><span>{symptoms.length}/500 characters</span><button className="feature-primary" onClick={run} disabled={loading||!symptoms.trim()}>{loading?<><span className="button-spinner"/>Finding...</>:<><Icon name="search" size={16}/>Find Department</>}</button></div>{error&&<div className="feature-error"><Icon name="info" size={16}/>{error}</div>}</section>
+    <aside className="feature-card finder-help"><div className="feature-card-title"><Icon name="info" size={18}/><h2>Important</h2></div><p>This is a navigation demo, not a medical diagnosis.</p><ul><li>Use clear, short symptom descriptions.</li><li>For emergencies, seek immediate medical help.</li><li>Use the suggested route only as hospital navigation guidance.</li></ul></aside></div>
+    {result?.emergency&&<section className="feature-card emergency-card"><div className="feature-notification-icon red"><Icon name="info" size={20}/></div><div><strong>{result.warning||"Emergency symptoms detected"}</strong><span>Please seek immediate medical attention.</span></div></section>}
+    {result&&!result.emergency&&<section className="feature-card finder-result"><div className="result-badge"><Icon name="check" size={18}/></div><div className="result-main"><span className="feature-eyebrow">Suggested destination</span><h2>{result.department}</h2><p>Confidence: <strong>{(result.confidence*100).toFixed(0)}%</strong></p><div className="route-chip"><Icon name="map" size={16}/><span>{result.path.join(" → ")}</span><b>{result.distance}m · ~{result.estimated_time_minutes} min</b></div><small>{result.disclaimer}</small></div></section>}
+  </div>;
+}

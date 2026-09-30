@@ -1,0 +1,9 @@
+venv/
+__pycache__/
+*.pyc
+instance/
+*.db
+.env
+model/*.pkl
+node_modules/
+dist/

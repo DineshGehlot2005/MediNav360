@@ -1,0 +1,24 @@
+symptoms,department
+chest pain shortness of breath heart discomfort palpitations,Cardiology
+high blood pressure chest tightness,Cardiology
+irregular heartbeat fainting,Cardiology
+knee pain joint swelling leg pain,Orthopedics
+back pain fracture bone injury,Orthopedics
+shoulder pain stiffness arthritis,Orthopedics
+sports injury sprain swelling joint,Orthopedics
+headache migraine dizziness,Neurology
+seizure numbness tingling in limbs,Neurology
+memory loss confusion,Neurology
+frequent headaches blurred vision dizziness,Neurology
+skin rash itching redness,Dermatology
+acne pimples oily skin,Dermatology
+hair fall scalp itching,Dermatology
+allergic reaction skin swelling,Dermatology
+ear pain hearing problem sore throat,ENT
+nose block sinus congestion,ENT
+throat pain difficulty swallowing,ENT
+ringing in ears hearing loss,ENT
+fever cold cough body ache,General Medicine
+weakness fatigue tiredness,General Medicine
+mild fever sore throat cough,General Medicine
+stomach pain nausea vomiting,General Medicine
