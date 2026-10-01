@@ -90,6 +90,7 @@ class Token(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     called_at = db.Column(db.DateTime)
     completed_at = db.Column(db.DateTime)
+    appointment = db.relationship("Appointment")
 
 
 class Notification(db.Model):

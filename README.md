@@ -137,3 +137,47 @@ After the remaining doctor/admin screenshots are shared, the next UI pass should
 - Toast notifications and consistent loading/error/empty states.
 - Database migrations with Flask-Migrate instead of rebuilding tables manually.
 - Production security: CSRF protection, stronger secrets, rate limiting, audit logging and HTTPS.
+
+
+MediNav360 - Phase 1 patch
+
+Replace these files in your local D:\MediNav360 project:
+
+1. frontend\src\api.js
+2. frontend\src\App.jsx
+3. frontend\src\components\Landing.jsx
+4. backend\database\models.py
+5. backend\database\seed.py
+
+Changes:
+- Added patient registration API method.
+- Fixed doctor list API path to /api/appointments/doctors.
+- Added doctor appointment complete API method.
+- Fixed Patient Dashboard -> Hospital Navigation destination passing.
+- Corrected Doctor demo email to doctor.cardio@hospital.demo.
+- Added Token.appointment relationship so Doctor Queue can resolve patient names.
+- Corrected seed.py demo-account output.
+
+After replacing the files:
+
+Backend:
+  cd D:\MediNav360\backend
+  python app.py
+
+Frontend (new terminal):
+  cd D:\MediNav360\frontend
+  npm run dev
+
+Then open:
+  http://localhost:5173
+
+Test Phase 1:
+- Patient Registration
+- Patient Book Appointment (doctor list loads)
+- Patient Dashboard -> Navigate (department is selected)
+- Doctor login with doctor.cardio@hospital.demo / doctor123
+- Doctor Approve
+- Doctor Queue
+- Doctor Complete
+
+No database reset is required for these code changes.

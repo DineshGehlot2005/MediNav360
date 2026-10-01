@@ -18,6 +18,8 @@ export const api = {
     request("/auth/login", { method: "POST", body: JSON.stringify({ email, password }) }),
   logout: () => request("/auth/logout", { method: "POST" }),
   me: () => request("/auth/me"),
+  register: (payload) =>
+    request("/auth/register", { method: "POST", body: JSON.stringify(payload) }),
 
   predict: (symptoms) =>
     request("/predict", { method: "POST", body: JSON.stringify({ symptoms }) }),
@@ -31,12 +33,13 @@ export const api = {
   myAppointments: () => request("/appointments"),
   bookAppointment: (payload) =>
     request("/appointments", { method: "POST", body: JSON.stringify(payload) }),
-  doctors: () => request("/doctors"),
+  doctors: () => request("/appointments/doctors"),
 
   doctorAppointments: (status) =>
     request(`/doctor/appointments${status ? `?status=${status}` : ""}`),
   approve: (id) => request(`/doctor/appointments/${id}/approve`, { method: "POST" }),
   reject: (id) => request(`/doctor/appointments/${id}/reject`, { method: "POST" }),
+  complete: (id) => request(`/doctor/appointments/${id}/complete`, { method: "POST" }),
   callNext: () => request("/doctor/token/next", { method: "POST" }),
   queue: () => request("/doctor/queue"),
 

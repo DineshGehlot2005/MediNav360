@@ -3,7 +3,7 @@ import { api } from "../api.js";
 
 const DEMO = [
   ["Patient", "patient@hospital.demo", "patient123"],
-  ["Doctor", "doctor.card@hospital.demo", "doctor123"],
+  ["Doctor", "doctor.cardio@hospital.demo", "doctor123"],
   ["Admin", "admin@hospital.demo", "admin123"],
 ];
 

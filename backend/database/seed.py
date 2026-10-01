@@ -105,4 +105,4 @@ with app.app_context():
 
     db.session.commit()
     print("Seed complete. Demo accounts: admin@hospital.demo/admin123, "
-          "doctor.card@hospital.demo/doctor123, patient@hospital.demo/patient123")
+          "doctor.cardio@hospital.demo/doctor123, patient@hospital.demo/patient123")

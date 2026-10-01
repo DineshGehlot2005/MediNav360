@@ -46,10 +46,16 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [checking, setChecking] = useState(true);
   const [tab, setTab] = useState("dashboard");
+  const [navDestination, setNavDestination] = useState("");
 
   useEffect(() => {
     api.me().then((r) => setUser(r.user)).catch(() => {}).finally(() => setChecking(false));
   }, []);
+
+  function handleNavigate(nextTab, options = {}) {
+    setTab(nextTab);
+    if (nextTab === "nav") setNavDestination(options.destination || "");
+  }
 
   async function handleLogout() {
     await api.logout().catch(() => {});
@@ -73,17 +79,17 @@ export default function App() {
 
   return (
     <div className={`app-shell ${patient ? "patient-shell" : ""} ${doctor ? "doctor-shell" : ""} ${admin ? "admin-shell" : ""}`}>
-      <Sidebar role={role} user={user} tab={tab} setTab={setTab} onLogout={handleLogout} />
+      <Sidebar role={role} user={user} tab={tab} setTab={handleNavigate} onLogout={handleLogout} />
       <main className="app-main">
-        <AppTopbar user={user} role={role} roleLabel={patient ? "Patient" : doctor ? "Doctor" : "Administrator"} placeholder={placeholder} onNavigate={setTab} />
+        <AppTopbar user={user} role={role} roleLabel={patient ? "Patient" : doctor ? "Doctor" : "Administrator"} placeholder={placeholder} onNavigate={handleNavigate} />
         <div className="page-content">
           {patient && (
             <>
-              {tab === "dashboard" && <PatientDashboard user={user} onNavigate={setTab} />}
+              {tab === "dashboard" && <PatientDashboard user={user} onNavigate={handleNavigate} />}
               {tab === "finder" && <PatientFinder />}
               {tab === "book" && <PatientBook onNavigate={setTab} />}
               {tab === "appointments" && <PatientAppointments />}
-              {tab === "nav" && <PatientNavigation />}
+              {tab === "nav" && <PatientNavigation initialDestination={navDestination} />}
               {tab === "notifications" && <Notifications role={role} />}
               {tab === "profile" && <Profile user={user} role={role} onUserChange={setUser} />}
               {tab === "settings" && <Settings role={role} />}
