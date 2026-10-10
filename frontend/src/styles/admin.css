@@ -1,0 +1,181 @@
+/* ============================================================
+   ADMIN — Dashboard, Analytics, Users, Management
+   ============================================================ */
+
+.admin-shell {
+  background: #f5f9fe;
+}
+
+.admin-dashboard {
+  max-width: 1540px;
+  margin: 0 auto;
+}
+
+.admin-list-page {
+  max-width: 1540px;
+  margin: 0 auto;
+}
+
+.admin-loading {
+  min-height: 420px;
+  display: grid;
+  place-items: center;
+  color: #6f86a4;
+  font-size: 14px;
+}
+
+.admin-welcome {
+  min-height: 128px;
+  border: 1px solid #dcecf8;
+  border-radius: 14px;
+  padding: 22px 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(100deg, #edf8ff, #f8fcff 57%, #e6f5ff);
+}
+
+.admin-welcome:after {
+  content: "";
+  position: absolute;
+  width: 290px;
+  height: 290px;
+  border-radius: 50%;
+  border: 28px solid rgba(39, 126, 219, 0.05);
+  right: -90px;
+  top: -100px;
+}
+
+.admin-welcome h1 {
+  margin: 0;
+  color: #123765;
+  font-size: 27px;
+  letter-spacing: -0.6px;
+}
+
+.admin-welcome p {
+  margin: 6px 0 0;
+  color: #5e789c;
+  font-size: 12px;
+}
+
+.admin-welcome-meta {
+  margin-left: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: right;
+  position: relative;
+  z-index: 2;
+}
+
+.admin-welcome-meta strong {
+  color: #1a4d83;
+  font-size: 12px;
+}
+
+.admin-welcome-meta span {
+  color: #6f88a6;
+  font-size: 10px;
+}
+
+/* ... (baaki admin CSS waise hi rahega) */
+
+/* Responsive */
+@media (max-width: 1180px) {
+  .admin-stat-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .admin-content-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .admin-right-column {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+  .admin-health-panel {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 900px) {
+  .admin-welcome {
+    padding: 18px;
+  }
+  .admin-hospital-illustration {
+    display: none;
+  }
+  .admin-stat-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .admin-content-grid {
+    grid-template-columns: 1fr;
+  }
+  .admin-right-column {
+    grid-column: auto;
+    display: flex;
+  }
+  .admin-middle-column {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .admin-main-column {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+  .admin-chart-panel,
+  .department-panel {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 620px) {
+  .admin-welcome h1 {
+    font-size: 21px;
+  }
+  .admin-welcome-meta {
+    display: none;
+  }
+  .admin-stat-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .admin-stat-card {
+    min-height: 85px;
+    padding: 10px;
+  }
+  .admin-stat-icon {
+    width: 35px;
+    height: 35px;
+  }
+  .admin-stat-copy strong {
+    font-size: 19px;
+  }
+  .admin-middle-column {
+    display: flex;
+  }
+  .admin-chart-area {
+    height: 165px;
+  }
+  .bar-track {
+    height: 120px;
+  }
+  .admin-department-list {
+    padding: 0 10px;
+  }
+  .department-row {
+    grid-template-columns: 9px minmax(100px, 1fr) 80px 24px;
+    gap: 6px;
+  }
+  .admin-quick-grid {
+    gap: 7px;
+  }
+  .admin-quick-grid button {
+    min-height: 82px;
+    padding: 9px;
+  }
+}

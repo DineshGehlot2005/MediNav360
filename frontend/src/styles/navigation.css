@@ -1,0 +1,391 @@
+/* ============================================================
+   NAVIGATION — HospitalMap, Directions, Route
+   Used by: Navigation.jsx, HospitalMap.jsx
+   ============================================================ */
+
+/* ===== PAGE WRAPPER (shared with all feature pages) ===== */
+.app-feature-page {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* ===== PAGE HEADER (shared with all feature pages) ===== */
+.feature-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.feature-page-header h1 {
+  margin: 5px 0 6px;
+  color: #182f50;
+  font-size: 28px;
+  letter-spacing: -0.5px;
+}
+
+.feature-page-header p {
+  margin: 0;
+  color: #71839a;
+  line-height: 1.55;
+  font-size: 13px;
+}
+
+.feature-eyebrow {
+  display: inline-flex;
+  color: #3b76c9;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.11em;
+}
+
+.feature-round-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: #eaf3ff;
+  color: #2d73ce;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+}
+
+/* ===== LAYOUT: Plan + Summary ===== */
+.navigation-layout {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 20px;
+}
+
+/* ===== PLAN ROUTE FIELDS ===== */
+.navigation-fields {
+  display: grid;
+  grid-template-columns: 1fr 30px 1fr;
+  align-items: end;
+  gap: 10px;
+}
+
+.navigation-fields label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  color: #48637f;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.navigation-fields select {
+  width: 100%;
+  border: 1px solid #dbe5ef;
+  border-radius: 10px;
+  background: #fff;
+  color: #243f5d;
+  padding: 11px 12px;
+  outline: none;
+  transition: 0.18s;
+}
+
+.navigation-fields select:focus {
+  border-color: #6da1e5;
+  box-shadow: 0 0 0 3px rgba(76, 133, 212, 0.1);
+}
+
+.swap-arrow {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  color: #7e94aa;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 8px;
+  align-self: end;
+}
+
+.swap-arrow:hover {
+  background: #e0e7ff;
+  border-color: #c7d2fe;
+  color: #3b82f6;
+}
+
+/* ===== ROUTE MODE SELECTOR ===== */
+.route-mode-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 17px 0;
+}
+
+.route-mode-grid button {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  text-align: left;
+  border: 1px solid #e1e8f0;
+  background: #fff;
+  border-radius: 11px;
+  padding: 11px;
+  cursor: pointer;
+}
+
+.route-mode-grid button.selected {
+  border-color: #76a6df;
+  background: #f2f7ff;
+}
+
+.radio-dot {
+  width: 13px;
+  height: 13px;
+  border: 2px solid #a9b8c8;
+  border-radius: 50%;
+  margin-top: 2px;
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.selected .radio-dot {
+  border-color: #3477d1;
+}
+
+.selected .radio-dot:after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  bottom: 3px;
+  left: 3px;
+  border-radius: 50%;
+  background: #3477d1;
+}
+
+.route-mode-grid strong,
+.route-mode-grid small {
+  display: block;
+}
+
+.route-mode-grid strong {
+  color: #365575;
+  font-size: 10px;
+}
+
+.route-mode-grid small {
+  color: #8a9bae;
+  font-size: 8px;
+  margin-top: 3px;
+  line-height: 1.35;
+}
+
+/* ===== HOSPITAL MAP ===== */
+.hospital-map-container {
+  position: relative;
+  width: 100%;
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.hospital-map-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.map-legend {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  padding: 8px 0 4px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.map-legend > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.multi-floor-badge {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  background: #dbeafe;
+  color: #1e40af;
+  border-radius: 6px;
+}
+
+/* ===== FULL-WIDTH MAP CARD ===== */
+.map-full-card {
+  margin-bottom: 0;
+}
+
+.map-route-label {
+  margin-left: auto;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 5px 12px;
+  background: #eff6ff;
+  color: #1e40af;
+  border-radius: 8px;
+}
+
+.map-full-card .hospital-map-svg {
+  max-height: 500px !important;
+}
+
+.map-full-card .hospital-map-container {
+  padding: 12px;
+}
+
+/* ===== ROUTE SUMMARY PANEL ===== */
+.route-summary-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.route-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 16px;
+  flex: 1;
+}
+
+.route-summary > div {
+  padding: 20px 12px;
+  background: #f8fafc;
+  border-radius: 12px;
+  text-align: center;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.route-summary span {
+  display: block;
+  font-size: 11px;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+
+.route-summary strong {
+  font-size: 20px;
+  color: #1e293b;
+  font-weight: 700;
+}
+
+/* ===== DIRECTIONS ===== */
+.directions-card {
+  margin-top: 0;
+}
+
+.directions-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.direction-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  background: #f8fafc;
+  border-radius: 10px;
+  border-left: 3px solid #3b82f6;
+}
+
+.direction-step-number {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #3b82f6;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.direction-step-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.direction-step-copy strong {
+  font-size: 14px;
+  color: #1e293b;
+}
+
+.direction-step-meta {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.directions-footer {
+  margin-top: 14px;
+  padding: 10px 12px;
+  background: #eff6ff;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #1e40af;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 900px) {
+  .navigation-layout {
+    grid-template-columns: 1fr;
+  }
+  .feature-page-header h1 {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 640px) {
+  .feature-page-header {
+    flex-direction: column;
+  }
+  .feature-page-header > div:last-child {
+    align-self: flex-start;
+  }
+  .navigation-fields {
+    grid-template-columns: 1fr;
+  }
+  .swap-arrow {
+    display: none;
+  }
+  .route-mode-grid {
+    margin: 12px 0;
+  }
+  .route-summary {
+    grid-template-columns: 1fr;
+  }
+}
