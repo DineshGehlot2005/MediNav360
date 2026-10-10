@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "./api.js";
 import Landing from "./components/Landing.jsx";
+import PublicHome from "./components/PublicHome.jsx";
 import Sidebar from "./components/Sidebar.jsx";
 import Icon from "./components/Icon.jsx";
 
@@ -44,6 +45,7 @@ function AppTopbar({ user, role, roleLabel, placeholder, onNavigate }) {
 
 export default function App() {
   const [user, setUser] = useState(null);
+  const [showPublicHome, setShowPublicHome] = useState(true);
   const [checking, setChecking] = useState(true);
   const [tab, setTab] = useState("dashboard");
   const [navDestination, setNavDestination] = useState("");
@@ -61,11 +63,27 @@ export default function App() {
     await api.logout().catch(() => {});
     setUser(null);
     setTab("dashboard");
+    setShowPublicHome(true); // logout ke baad wapas public home pe
   }
 
-  if (checking) return <div className="app-loading">Loading Hospital Nav...</div>;
-  if (!user) return <Landing onLogin={setUser} />;
+  // ---- RENDER LOGIC ----
 
+  // 1. Check kar rahe hain — loading dikhao
+  if (checking) {
+    return <div className="app-loading">Loading Hospital Nav...</div>;
+  }
+
+  // 2. User logged in nahi + public home dikhana hai → PublicHome
+  if (!user && showPublicHome) {
+    return <PublicHome onGetStarted={() => setShowPublicHome(false)} />;
+  }
+
+  // 3. User logged in nahi + public home nahi dikhana → Login page
+  if (!user) {
+    return <Landing onLogin={setUser} />;
+  }
+
+  // 4. User logged in hai → Main App
   const role = user.role;
   const patient = role === "PATIENT";
   const doctor = role === "DOCTOR";
@@ -79,6 +97,7 @@ export default function App() {
 
   return (
     <div className={`app-shell ${patient ? "patient-shell" : ""} ${doctor ? "doctor-shell" : ""} ${admin ? "admin-shell" : ""}`}>
+      
       <Sidebar role={role} user={user} tab={tab} setTab={handleNavigate} onLogout={handleLogout} />
       <main className="app-main">
         <AppTopbar user={user} role={role} roleLabel={patient ? "Patient" : doctor ? "Doctor" : "Administrator"} placeholder={placeholder} onNavigate={handleNavigate} />
