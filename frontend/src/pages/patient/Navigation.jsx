@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { api } from "../../api.js";
 import Icon from "../../components/Icon.jsx";
 import HospitalMap from "../../components/HospitalMap.jsx";
+import QRScanner from "../../components/QRScanner.jsx";
 
 const NODES = [
   "Entrance",
@@ -35,17 +36,14 @@ const NODE_FLOORS = {
 function buildDirections(path) {
   if (!path || path.length < 2) return [];
   const steps = [];
-
   for (let i = 0; i < path.length - 1; i++) {
     const from = path[i];
     const to = path[i + 1];
     const fromFloor = NODE_FLOORS[from];
     const toFloor = NODE_FLOORS[to];
     const floorChange = fromFloor !== toFloor;
-
     let label;
     let isFloorChange = false;
-
     if (i === 0) {
       label = `Start at ${from}, head towards ${to}`;
     } else if (i === path.length - 2) {
@@ -53,17 +51,15 @@ function buildDirections(path) {
     } else {
       label = `Continue to ${to}`;
     }
-
-    // Agar floor change ho raha hai toh special message
     if (floorChange) {
-      const direction = ["First", "Second"].indexOf(toFloor) >
+      const direction =
+        ["First", "Second"].indexOf(toFloor) >
         ["First", "Second"].indexOf(fromFloor)
-        ? "up"
-        : "down";
+          ? "up"
+          : "down";
       label = `Take the elevator ${direction} to ${toFloor} floor → ${to}`;
       isFloorChange = true;
     }
-
     steps.push({
       step: i + 1,
       from,
@@ -93,13 +89,20 @@ function formatTime(minutes) {
 }
 
 export default function PatientNavigation({ initialDestination = "" }) {
-  const [source, setSource] = useState("Entrance");
+  // ===== URL se source read karo (QR scan ke liye) =====
+  const [source, setSource] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    const urlSource = params.get("source");
+    return urlSource && NODES.includes(urlSource) ? urlSource : "Entrance";
+  });
+
   const [dest, setDest] = useState("Cardiology");
   const [mode, setMode] = useState("normal");
   const [route, setRoute] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [activeFloor, setActiveFloor] = useState("Ground");
+  const [showScanner, setShowScanner] = useState(false);
 
   // Initial destination (AI se)
   useEffect(() => {
@@ -114,7 +117,7 @@ export default function PatientNavigation({ initialDestination = "" }) {
     setError("");
   }, [source, dest, mode]);
 
-  // Route aane pe auto-switch to source floor
+  // Auto-switch floor
   useEffect(() => {
     if (route?.path?.length) {
       const sourceFloor = NODE_FLOORS[route.path[0]];
@@ -143,12 +146,18 @@ export default function PatientNavigation({ initialDestination = "" }) {
     setDest(source);
   }
 
-  const directions = route?.path ? buildDirections(route.path) : [];
+  // ===== QR Scan success handler =====
+  function handleQRScan(nodeName) {
+    if (NODES.includes(nodeName)) {
+      setSource(nodeName);
+      setShowScanner(false);
+    }
+  }
 
+  const directions = route?.path ? buildDirections(route.path) : [];
   const floorsInRoute = route?.path
     ? [...new Set(route.path.map((n) => NODE_FLOORS[n]).filter(Boolean))]
     : [];
-
   const hasMultiFloor = floorsInRoute.length > 1;
 
   return (
@@ -165,12 +174,26 @@ export default function PatientNavigation({ initialDestination = "" }) {
       </div>
 
       <div className="navigation-layout">
-        {/* Left: Plan route */}
+        {/* ===== Left: Plan route ===== */}
         <section className="feature-card">
           <div className="feature-card-title">
             <Icon name="map" size={18} />
             <h2>Plan your route</h2>
           </div>
+
+          {/* ===== SCAN QR BUTTON ===== */}
+          <button
+            type="button"
+            className="scan-qr-btn"
+            onClick={() => setShowScanner(true)}
+          >
+            <Icon name="grid" size={18} />
+            <div>
+              <strong>Scan QR Code</strong>
+              <small>Scan the QR code near you to set your current location</small>
+            </div>
+            <Icon name="chevron" size={16} />
+          </button>
 
           <div className="navigation-fields">
             <label>
@@ -261,7 +284,7 @@ export default function PatientNavigation({ initialDestination = "" }) {
           )}
         </section>
 
-        {/* Right: Route summary */}
+        {/* ===== Right: Route summary ===== */}
         <aside className="feature-card route-summary-panel">
           <div className="feature-card-title">
             <Icon name="pin" size={18} />
@@ -296,7 +319,6 @@ export default function PatientNavigation({ initialDestination = "" }) {
                 </div>
               </div>
 
-              {/* Floor path chips */}
               {hasMultiFloor && (
                 <div className="floor-path">
                   <span className="floor-path-label">Floors involved:</span>
@@ -326,7 +348,7 @@ export default function PatientNavigation({ initialDestination = "" }) {
         </aside>
       </div>
 
-      {/* Full-width map */}
+      {/* ===== Full-width map ===== */}
       <section className="feature-card map-full-card">
         <div className="feature-card-title">
           <Icon name="map" size={18} />
@@ -350,7 +372,7 @@ export default function PatientNavigation({ initialDestination = "" }) {
         />
       </section>
 
-      {/* Directions */}
+      {/* ===== Directions ===== */}
       {route && directions.length > 0 && (
         <section className="feature-card directions-card">
           <div className="feature-card-title">
@@ -369,19 +391,14 @@ export default function PatientNavigation({ initialDestination = "" }) {
                 <div className="direction-step-number">{dir.step}</div>
                 <div className="direction-step-copy">
                   <strong>
-                    {dir.isFloorChange && (
-                      <Icon name="elevator" size={14} />
-                    )}{" "}
-                    {dir.label}
+                    {dir.isFloorChange && <span>🛗</span>} {dir.label}
                   </strong>
                   <span className="direction-step-meta">
                     {dir.from} ({dir.fromFloor}) → {dir.to} ({dir.toFloor})
                   </span>
                 </div>
                 {dir.isFloorChange && (
-                  <span className="floor-change-badge">
-                    Floor change
-                  </span>
+                  <span className="floor-change-badge">Floor change</span>
                 )}
               </li>
             ))}
@@ -394,6 +411,14 @@ export default function PatientNavigation({ initialDestination = "" }) {
             </span>
           </div>
         </section>
+      )}
+
+      {/* ===== QR Scanner Modal ===== */}
+      {showScanner && (
+        <QRScanner
+          onScan={handleQRScan}
+          onClose={() => setShowScanner(false)}
+        />
       )}
     </div>
   );
