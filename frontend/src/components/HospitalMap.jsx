@@ -1,6 +1,6 @@
 import React from "react";
 
-// Node positions ko map karne ke liye (seed.py ke x, y coordinates ke hisaab se)
+// Node positions (seed.py ke hisaab se)
 const NODE_POSITIONS = {
   Entrance: { x: 80, y: 320 },
   Reception: { x: 200, y: 280 },
@@ -15,11 +15,34 @@ const NODE_POSITIONS = {
   "General Medicine": { x: 260, y: 200 },
 };
 
+// Har node ka floor (Navigation.jsx se sync)
+const NODE_FLOORS = {
+  Entrance: "Ground",
+  Reception: "Ground",
+  "Main Corridor": "Ground",
+  Elevator: "Ground",
+  Pharmacy: "Ground",
+  "General Medicine": "First",
+  Dermatology: "First",
+  ENT: "First",
+  Cardiology: "Second",
+  Orthopedics: "Second",
+  Neurology: "Second",
+};
+
 const FLOOR_COLORS = {
   Ground: "#f0f9ff",
   First: "#fef3c7",
   Second: "#fce7f3",
 };
+
+const FLOOR_LABELS = {
+  Ground: "Ground Floor",
+  First: "First Floor",
+  Second: "Second Floor",
+};
+
+const ALL_FLOORS = ["Ground", "First", "Second"];
 
 export default function HospitalMap({
   route,
@@ -27,28 +50,81 @@ export default function HospitalMap({
   destination,
   activeFloor = "Ground",
   onNodeClick,
+  onFloorChange,
 }) {
   const path = route?.path || [];
   const pathSet = new Set(path);
 
-  // Route ke consecutive nodes ke beech line draw karo
+  // Sirf active floor ke nodes dikhao
+  const visibleNodes = Object.entries(NODE_POSITIONS).filter(
+    ([name]) => NODE_FLOORS[name] === activeFloor
+  );
+
+  // Route lines — sirf woh lines jo active floor pe hain
   const routeLines = [];
   for (let i = 0; i < path.length - 1; i++) {
-    const from = NODE_POSITIONS[path[i]];
-    const to = NODE_POSITIONS[path[i + 1]];
-    if (from && to) {
-      routeLines.push({ from, to, key: `${path[i]}-${path[i + 1]}` });
+    const fromName = path[i];
+    const toName = path[i + 1];
+    const fromPos = NODE_POSITIONS[fromName];
+    const toPos = NODE_POSITIONS[toName];
+    const fromFloor = NODE_FLOORS[fromName];
+    const toFloor = NODE_FLOORS[toName];
+
+    // Dono nodes same floor pe hone chahiye (active floor pe)
+    if (
+      fromPos &&
+      toPos &&
+      fromFloor === activeFloor &&
+      toFloor === activeFloor
+    ) {
+      routeLines.push({
+        from: fromPos,
+        to: toPos,
+        key: `${fromName}-${toName}`,
+      });
     }
   }
 
+  // Corridors — sirf same floor ke nodes ke beech
+  const corridorLines = visibleNodes
+    .filter(([name]) => name !== "Entrance")
+    .map(([name, pos]) => {
+      const entrancePos = NODE_POSITIONS["Entrance"];
+      // Sirf tab dikhao jab Entrance bhi same floor pe ho
+      if (NODE_FLOORS["Entrance"] !== activeFloor) return null;
+      return { key: `corridor-${name}`, from: entrancePos, to: pos };
+    })
+    .filter(Boolean);
+
   return (
     <div className="hospital-map-container">
+      {/* ===== FLOOR TABS ===== */}
+      <div className="floor-tabs">
+        {ALL_FLOORS.map((floor) => {
+          const isActive = floor === activeFloor;
+          const hasRouteNode = path.some((n) => NODE_FLOORS[n] === floor);
+          return (
+            <button
+              key={floor}
+              type="button"
+              className={`floor-tab ${isActive ? "active" : ""} ${
+                hasRouteNode ? "has-route" : ""
+              }`}
+              onClick={() => onFloorChange && onFloorChange(floor)}
+            >
+              {FLOOR_LABELS[floor]}
+              {hasRouteNode && <span className="floor-route-dot" />}
+            </button>
+          );
+        })}
+      </div>
+
       <svg
         viewBox="0 0 720 400"
         className="hospital-map-svg"
         style={{ width: "100%", height: "auto", maxHeight: "400px" }}
       >
-        {/* ===== LAYER 1: Background floor ===== */}
+        {/* Background floor */}
         <rect
           x="20"
           y="20"
@@ -60,26 +136,36 @@ export default function HospitalMap({
           strokeWidth="2"
         />
 
-        {/* ===== LAYER 2: Corridors (dashed lines) ===== */}
-        {Object.entries(NODE_POSITIONS).map(([name, pos]) => {
-          if (name === "Entrance") return null;
-          const entrancePos = NODE_POSITIONS["Entrance"];
-          return (
-            <line
-              key={`corridor-${name}`}
-              x1={entrancePos.x}
-              y1={entrancePos.y}
-              x2={pos.x}
-              y2={pos.y}
-              stroke="#e2e8f0"
-              strokeWidth="2"
-              strokeDasharray="4 4"
-            />
-          );
-        })}
+        {/* Floor label watermark */}
+        <text
+          x="360"
+          y="55"
+          textAnchor="middle"
+          fontSize="14"
+          fontWeight="700"
+          fill="#cbd5e1"
+          opacity="0.8"
+          style={{ pointerEvents: "none" }}
+        >
+          {FLOOR_LABELS[activeFloor]}
+        </text>
 
-        {/* ===== LAYER 3: Pulsing marker (SABSE PEHLE — taaki text upar dikhe) ===== */}
-        {source && NODE_POSITIONS[source] && (
+        {/* Corridors */}
+        {corridorLines.map(({ key, from, to }) => (
+          <line
+            key={key}
+            x1={from.x}
+            y1={from.y}
+            x2={to.x}
+            y2={to.y}
+            stroke="#e2e8f0"
+            strokeWidth="2"
+            strokeDasharray="4 4"
+          />
+        ))}
+
+        {/* Pulsing source marker (sabse pehle) */}
+        {source && NODE_POSITIONS[source] && NODE_FLOORS[source] === activeFloor && (
           <g style={{ pointerEvents: "none" }}>
             <circle
               cx={NODE_POSITIONS[source].x}
@@ -106,7 +192,7 @@ export default function HospitalMap({
           </g>
         )}
 
-        {/* ===== LAYER 4: Route highlight ===== */}
+        {/* Route highlight */}
         {routeLines.map(({ from, to, key }) => (
           <line
             key={key}
@@ -121,8 +207,8 @@ export default function HospitalMap({
           />
         ))}
 
-        {/* ===== LAYER 5: Nodes (rects + text) — sabse upar ===== */}
-        {Object.entries(NODE_POSITIONS).map(([name, pos]) => {
+        {/* Nodes */}
+        {visibleNodes.map(([name, pos]) => {
           const isSource = name === source;
           const isDestination = name === destination;
           const isInPath = pathSet.has(name);
@@ -158,7 +244,9 @@ export default function HospitalMap({
                 y={isTwoLine ? pos.y - 3 : pos.y + 4}
                 textAnchor="middle"
                 fontSize="10"
-                fontWeight={isInPath || isSource || isDestination ? "700" : "500"}
+                fontWeight={
+                  isInPath || isSource || isDestination ? "700" : "500"
+                }
                 fill={
                   isDestination || isSource
                     ? "#ffffff"
@@ -177,6 +265,20 @@ export default function HospitalMap({
             </g>
           );
         })}
+
+        {/* Empty floor message */}
+        {visibleNodes.length === 0 && (
+          <text
+            x="360"
+            y="200"
+            textAnchor="middle"
+            fontSize="14"
+            fill="#94a3b8"
+            style={{ pointerEvents: "none" }}
+          >
+            No locations on this floor
+          </text>
+        )}
       </svg>
 
       {/* Legend */}

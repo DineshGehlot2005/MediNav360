@@ -389,3 +389,157 @@
     grid-template-columns: 1fr;
   }
 }
+
+
+/* ============================================================
+   MULTI-FLOOR SUPPORT
+   ============================================================ */
+
+/* ===== FLOOR TABS ===== */
+.floor-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 4px;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.floor-tab {
+  flex: 1;
+  position: relative;
+  padding: 10px 14px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.floor-tab:hover {
+  background: #eff6ff;
+  color: #3b82f6;
+}
+
+.floor-tab.active {
+  background: #3b82f6;
+  color: #fff;
+  border-color: #2563eb;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+}
+
+.floor-tab.has-route {
+  font-weight: 700;
+}
+
+.floor-route-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+  display: inline-block;
+}
+
+.floor-tab.active .floor-route-dot {
+  background: #fff;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.4);
+}
+
+/* ===== FLOOR PATH CHIPS (in route summary) ===== */
+.floor-path {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.floor-path-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+
+.floor-path-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.floor-chip {
+  padding: 6px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 20px;
+  background: #fff;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.floor-chip:hover {
+  border-color: #3b82f6;
+  color: #3b82f6;
+}
+
+.floor-chip.active {
+  background: #3b82f6;
+  color: #fff;
+  border-color: #3b82f6;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.25);
+}
+
+/* ===== FLOOR CHANGE DIRECTION STEP ===== */
+.direction-step.floor-change {
+  background: #fffbeb;
+  border-left-color: #f59e0b;
+}
+
+.direction-step.floor-change .direction-step-number {
+  background: #f59e0b;
+}
+
+.direction-step.floor-change strong {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #92400e;
+}
+
+.floor-change-badge {
+  margin-left: auto;
+  padding: 3px 8px;
+  background: #fef3c7;
+  color: #92400e;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 6px;
+  white-space: nowrap;
+  align-self: center;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 640px) {
+  .floor-tab {
+    padding: 8px 10px;
+    font-size: 11px;
+  }
+  .floor-tab .floor-route-dot {
+    width: 6px;
+    height: 6px;
+  }
+  .floor-change-badge {
+    display: none;
+  }
+}

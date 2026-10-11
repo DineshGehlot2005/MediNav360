@@ -17,7 +17,6 @@ const NODES = [
   "Neurology",
 ];
 
-// Node → Floor mapping (seed.py ke hisaab se)
 const NODE_FLOORS = {
   Entrance: "Ground",
   Reception: "Ground",
@@ -32,14 +31,21 @@ const NODE_FLOORS = {
   Neurology: "Second",
 };
 
-// Turn-by-turn directions generate karo
+// ===== FLOOR-AWARE DIRECTIONS =====
 function buildDirections(path) {
   if (!path || path.length < 2) return [];
   const steps = [];
+
   for (let i = 0; i < path.length - 1; i++) {
     const from = path[i];
     const to = path[i + 1];
+    const fromFloor = NODE_FLOORS[from];
+    const toFloor = NODE_FLOORS[to];
+    const floorChange = fromFloor !== toFloor;
+
     let label;
+    let isFloorChange = false;
+
     if (i === 0) {
       label = `Start at ${from}, head towards ${to}`;
     } else if (i === path.length - 2) {
@@ -47,12 +53,30 @@ function buildDirections(path) {
     } else {
       label = `Continue to ${to}`;
     }
-    steps.push({ step: i + 1, from, to, label });
+
+    // Agar floor change ho raha hai toh special message
+    if (floorChange) {
+      const direction = ["First", "Second"].indexOf(toFloor) >
+        ["First", "Second"].indexOf(fromFloor)
+        ? "up"
+        : "down";
+      label = `Take the elevator ${direction} to ${toFloor} floor → ${to}`;
+      isFloorChange = true;
+    }
+
+    steps.push({
+      step: i + 1,
+      from,
+      to,
+      label,
+      fromFloor,
+      toFloor,
+      isFloorChange,
+    });
   }
   return steps;
 }
 
-// Distance + time format karo
 function formatDistance(meters) {
   if (!meters && meters !== 0) return "—";
   if (meters < 1000) return `${meters} m`;
@@ -75,19 +99,30 @@ export default function PatientNavigation({ initialDestination = "" }) {
   const [route, setRoute] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [activeFloor, setActiveFloor] = useState("Ground");
 
-  // Jab initialDestination aaye (AI se), set karo
+  // Initial destination (AI se)
   useEffect(() => {
     if (initialDestination && NODES.includes(initialDestination)) {
       setDest(initialDestination);
     }
   }, [initialDestination]);
 
-  // Source ya dest change hone pe purana route hata do
+  // Route reset on source/dest/mode change
   useEffect(() => {
     setRoute(null);
     setError("");
   }, [source, dest, mode]);
+
+  // Route aane pe auto-switch to source floor
+  useEffect(() => {
+    if (route?.path?.length) {
+      const sourceFloor = NODE_FLOORS[route.path[0]];
+      if (sourceFloor) setActiveFloor(sourceFloor);
+    } else {
+      setActiveFloor(NODE_FLOORS[source] || "Ground");
+    }
+  }, [route, source]);
 
   async function run() {
     setError("");
@@ -110,10 +145,11 @@ export default function PatientNavigation({ initialDestination = "" }) {
 
   const directions = route?.path ? buildDirections(route.path) : [];
 
-  // Route mein jo floors involved hain
   const floorsInRoute = route?.path
     ? [...new Set(route.path.map((n) => NODE_FLOORS[n]).filter(Boolean))]
     : [];
+
+  const hasMultiFloor = floorsInRoute.length > 1;
 
   return (
     <div className="app-feature-page inner-page">
@@ -128,9 +164,8 @@ export default function PatientNavigation({ initialDestination = "" }) {
         </div>
       </div>
 
-      {/* ===== TOP: Plan + Route Summary (2 columns) ===== */}
       <div className="navigation-layout">
-        {/* Left: Plan your route */}
+        {/* Left: Plan route */}
         <section className="feature-card">
           <div className="feature-card-title">
             <Icon name="map" size={18} />
@@ -146,7 +181,7 @@ export default function PatientNavigation({ initialDestination = "" }) {
               >
                 {NODES.map((n) => (
                   <option key={n} value={n}>
-                    {n}
+                    {n} ({NODE_FLOORS[n]})
                   </option>
                 ))}
               </select>
@@ -167,7 +202,7 @@ export default function PatientNavigation({ initialDestination = "" }) {
               <select value={dest} onChange={(e) => setDest(e.target.value)}>
                 {NODES.map((n) => (
                   <option key={n} value={n}>
-                    {n}
+                    {n} ({NODE_FLOORS[n]})
                   </option>
                 ))}
               </select>
@@ -226,12 +261,12 @@ export default function PatientNavigation({ initialDestination = "" }) {
           )}
         </section>
 
-        {/* Right: Route summary cards */}
+        {/* Right: Route summary */}
         <aside className="feature-card route-summary-panel">
           <div className="feature-card-title">
             <Icon name="pin" size={18} />
             <h2>Route summary</h2>
-            {floorsInRoute.length > 1 && (
+            {hasMultiFloor && (
               <span className="multi-floor-badge">
                 {floorsInRoute.length} floors
               </span>
@@ -239,26 +274,49 @@ export default function PatientNavigation({ initialDestination = "" }) {
           </div>
 
           {route ? (
-            <div className="route-summary">
-              <div>
-                <span>Distance</span>
-                <strong>{formatDistance(route.distance)}</strong>
+            <>
+              <div className="route-summary">
+                <div>
+                  <span>Distance</span>
+                  <strong>{formatDistance(route.distance)}</strong>
+                </div>
+                <div>
+                  <span>Estimated time</span>
+                  <strong>{formatTime(route.estimated_time_minutes)}</strong>
+                </div>
+                <div>
+                  <span>Mode</span>
+                  <strong>
+                    {mode === "normal"
+                      ? "Normal"
+                      : mode === "wheelchair"
+                      ? "Wheelchair"
+                      : "No stairs"}
+                  </strong>
+                </div>
               </div>
-              <div>
-                <span>Estimated time</span>
-                <strong>{formatTime(route.estimated_time_minutes)}</strong>
-              </div>
-              <div>
-                <span>Mode</span>
-                <strong>
-                  {mode === "normal"
-                    ? "Normal"
-                    : mode === "wheelchair"
-                    ? "Wheelchair"
-                    : "No stairs"}
-                </strong>
-              </div>
-            </div>
+
+              {/* Floor path chips */}
+              {hasMultiFloor && (
+                <div className="floor-path">
+                  <span className="floor-path-label">Floors involved:</span>
+                  <div className="floor-path-chips">
+                    {floorsInRoute.map((floor) => (
+                      <button
+                        key={floor}
+                        type="button"
+                        className={`floor-chip ${
+                          floor === activeFloor ? "active" : ""
+                        }`}
+                        onClick={() => setActiveFloor(floor)}
+                      >
+                        {floor}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
           ) : (
             <div className="feature-empty compact-empty">
               Select locations and click <strong>Find Shortest Path</strong> to
@@ -268,7 +326,7 @@ export default function PatientNavigation({ initialDestination = "" }) {
         </aside>
       </div>
 
-      {/* ===== FULL-WIDTH MAP (Hero Element) ===== */}
+      {/* Full-width map */}
       <section className="feature-card map-full-card">
         <div className="feature-card-title">
           <Icon name="map" size={18} />
@@ -284,13 +342,15 @@ export default function PatientNavigation({ initialDestination = "" }) {
           route={route}
           source={source}
           destination={dest}
+          activeFloor={activeFloor}
+          onFloorChange={setActiveFloor}
           onNodeClick={(name) => {
             if (name !== source) setDest(name);
           }}
         />
       </section>
 
-      {/* ===== Step-by-step directions ===== */}
+      {/* Directions */}
       {route && directions.length > 0 && (
         <section className="feature-card directions-card">
           <div className="feature-card-title">
@@ -300,14 +360,29 @@ export default function PatientNavigation({ initialDestination = "" }) {
 
           <ol className="directions-list">
             {directions.map((dir) => (
-              <li key={dir.step} className="direction-step">
+              <li
+                key={dir.step}
+                className={`direction-step ${
+                  dir.isFloorChange ? "floor-change" : ""
+                }`}
+              >
                 <div className="direction-step-number">{dir.step}</div>
                 <div className="direction-step-copy">
-                  <strong>{dir.label}</strong>
+                  <strong>
+                    {dir.isFloorChange && (
+                      <Icon name="elevator" size={14} />
+                    )}{" "}
+                    {dir.label}
+                  </strong>
                   <span className="direction-step-meta">
-                    {dir.from} → {dir.to}
+                    {dir.from} ({dir.fromFloor}) → {dir.to} ({dir.toFloor})
                   </span>
                 </div>
+                {dir.isFloorChange && (
+                  <span className="floor-change-badge">
+                    Floor change
+                  </span>
+                )}
               </li>
             ))}
           </ol>
