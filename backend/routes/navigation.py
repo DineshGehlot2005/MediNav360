@@ -17,7 +17,13 @@ def shortest_path_route():
     if not route:
         return jsonify(success=False, error="No route found between these locations"), 404
 
+    # 1.2 m/s = 72 m/min avg walking speed (hospital mein thoda slow)
+    estimated_time_minutes = round(route["distance"] / 72, 2)
+
     return jsonify(
-        success=True, path=route["path"], distance=route["distance"],
-        estimated_time_minutes=max(1, round(route["distance"] / 25)), mode=mode,
+        success=True,
+        path=route["path"],
+        distance=route["distance"],
+        estimated_time_minutes=estimated_time_minutes,
+        mode=mode,
     )

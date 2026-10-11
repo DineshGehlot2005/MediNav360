@@ -1,0 +1,8 @@
+/* ============================================================
+   AUTH — Login, Register, Public Home
+   ============================================================ */
+
+/* PublicHome ke liye koi extra CSS nahi chahiye —
+   Tailwind classes direct JSX mein use hui hain */
+
+/* Login/Register pages agar custom CSS use karte hain toh yahan add karo */
