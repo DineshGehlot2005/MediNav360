@@ -88,7 +88,7 @@ export default function PatientDashboard({ user, onNavigate }) {
                   <div>
                     <h3>{nextAppointment.department}</h3>
                     <p>{nextAppointment.doctor}</p>
-                    <span><Icon name="pin" size={16} /> Hospital consultation</span>
+                   <span><Icon name="pin" size={16} /> In-person consultation</span>
                   </div>
                 </div>
                 <div className="next-details">
