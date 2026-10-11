@@ -25,16 +25,34 @@ def appointment_to_dict(a: Appointment):
 @bp.get("/doctors")
 @login_required
 def list_doctors():
-    doctors = Doctor.query.filter_by(is_available=True).order_by(Doctor.department_id, Doctor.id).all()
-    return jsonify(success=True, doctors=[{
-        "id": d.id,
-        "name": d.user.name,
-        "department": d.department.name,
-        "department_id": d.department_id,
-        "specialization": d.specialization,
-        "experience": d.experience,
-        "room": d.room_number,
-    } for d in doctors])
+    doctors = (
+        Doctor.query.filter_by(is_available=True)
+        .order_by(Doctor.department_id, Doctor.id)
+        .all()
+    )
+    return jsonify(
+        success=True,
+        doctors=[
+            {
+                "id": d.id,
+                "name": d.user.name,
+                "department": d.department.name,
+                "department_id": d.department_id,
+                "specialization": d.specialization,
+                "qualification": d.qualification,
+                "experience": d.experience,
+                "room": d.room_number,
+                "photo_url": d.photo_url,
+                "fees": d.fees,
+                "rating": d.rating,
+                "review_count": d.review_count,
+                "consultation_duration": d.consultation_duration,
+                "bio": d.bio,
+                "languages": d.languages,
+            }
+            for d in doctors
+        ],
+    )
 
 
 @bp.post("")
@@ -117,3 +135,48 @@ def get_appointment(appt_id):
     elif current_user.role != "ADMIN":
         return jsonify(success=False, error="Not authorized"), 403
     return jsonify(success=True, appointment=appointment_to_dict(a))
+
+
+@bp.get("/doctors/<int:doctor_id>/slots")
+@login_required
+def doctor_slots(doctor_id):
+    """Return booked slots for a doctor on a given date."""
+    date_ = (request.args.get("date") or "").strip()
+    if not date_:
+        return jsonify(success=False, error="date is required"), 400
+
+    booked = (
+        Appointment.query.filter_by(
+            doctor_id=doctor_id,
+            appointment_date=date_,
+        )
+        .filter(Appointment.status.in_(["PENDING", "APPROVED"]))
+        .all()
+    )
+    booked_times = [a.appointment_time for a in booked]
+    return jsonify(success=True, booked=booked_times)
+
+@bp.delete("/<int:appointment_id>")
+@login_required
+def cancel_appointment(appointment_id):
+    patient = require_patient()
+    if not patient:
+        return jsonify(success=False, error="Patient only"), 403
+
+    appt = Appointment.query.filter_by(
+        id=appointment_id,
+        patient_id=patient.id,
+    ).first()
+
+    if not appt:
+        return jsonify(success=False, error="Appointment not found"), 404
+
+    if appt.status not in ("PENDING", "APPROVED"):
+        return jsonify(
+            success=False,
+            error="Only pending or approved appointments can be cancelled",
+        ), 400
+
+    appt.status = "CANCELLED"
+    db.session.commit()
+    return jsonify(success=True)

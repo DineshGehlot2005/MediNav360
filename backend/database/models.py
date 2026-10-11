@@ -57,6 +57,14 @@ class Doctor(db.Model):
     experience = db.Column(db.Integer)
     room_number = db.Column(db.String(20))
     is_available = db.Column(db.Boolean, default=True)
+    # NEW FIELDS
+    photo_url = db.Column(db.String(255))
+    fees = db.Column(db.Integer, default=500)
+    rating = db.Column(db.Float, default=4.5)
+    review_count = db.Column(db.Integer, default=0)
+    consultation_duration = db.Column(db.Integer, default=15)  # minutes
+    bio = db.Column(db.String(500))
+    languages = db.Column(db.String(120), default="Hindi, English")
     user = db.relationship("User")
     department = db.relationship("Department")
 
