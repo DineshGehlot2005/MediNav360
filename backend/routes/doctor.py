@@ -24,8 +24,10 @@ def doctor_appointments():
     if status:
         q = q.filter_by(status=status)
     appts = q.order_by(Appointment.created_at.desc()).all()
+
     return jsonify(success=True, appointments=[{
         "id": a.id,
+        "patient_id": a.patient_id,
         "patient": a.patient.user.name,
         "date": a.appointment_date,
         "time": a.appointment_time,
@@ -115,3 +117,62 @@ def queue():
         "patient": t.appointment.patient.user.name if t.appointment and t.appointment.patient and t.appointment.patient.user else "Patient",
         "appointment_id": t.appointment_id,
     } for t in tokens])
+
+
+@bp.get("/patients/<int:patient_id>")
+@login_required
+def patient_detail(patient_id):
+    """Full patient profile for the doctor — medical info + appointment history."""
+    doctor = require_doctor()
+    if not doctor:
+        return jsonify(success=False, error="Only doctors can view this"), 403
+
+    from database.models import Patient
+
+    p = Patient.query.get_or_404(patient_id)
+    user = p.user
+
+    appts = (
+        Appointment.query.filter_by(doctor_id=doctor.id, patient_id=patient_id)
+        .order_by(Appointment.created_at.desc())
+        .all()
+    )
+
+    age = None
+    if p.date_of_birth:
+        try:
+            dob = datetime.strptime(p.date_of_birth, "%Y-%m-%d").date()
+            today = date.today()
+            age = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
+        except (ValueError, TypeError):
+            age = None
+
+    return jsonify(
+        success=True,
+        patient={
+            "id": p.id,
+            "name": user.name,
+            "email": user.email,
+            "phone": user.phone,
+            "date_of_birth": p.date_of_birth,
+            "age": age,
+            "gender": p.gender,
+            "address": p.address,
+            "blood_group": p.blood_group,
+            "emergency_contact": p.emergency_contact,
+            "total_visits": len(appts),
+            "last_visit": appts[0].appointment_date if appts else None,
+            "appointments": [
+                {
+                    "id": a.id,
+                    "appointment_date": a.appointment_date,
+                    "date": a.appointment_date,
+                    "time": a.appointment_time,
+                    "reason": a.reason,
+                    "status": a.status,
+                    "department": a.department.name if a.department else None,
+                }
+                for a in appts
+            ],
+        },
+    )

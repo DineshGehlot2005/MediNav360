@@ -48,6 +48,7 @@ export const api = {
 
   // ===== PATIENT APPOINTMENTS =====
   myAppointments: () => request("/appointments"),
+
   bookAppointment: (payload) =>
     request("/appointments", { method: "POST", body: JSON.stringify(payload) }),
   cancelAppointment: (id) =>
@@ -59,6 +60,7 @@ export const api = {
   // ===== DOCTOR =====
   doctorAppointments: (status) =>
     request(`/doctor/appointments${status ? `?status=${status}` : ""}`),
+  doctorPatientDetail: (patientId) => request(`/doctor/patients/${patientId}`),
   approve: (id) =>
     request(`/doctor/appointments/${id}/approve`, { method: "POST" }),
   reject: (id, reason) =>
