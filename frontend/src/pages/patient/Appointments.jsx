@@ -45,7 +45,7 @@ export default function PatientAppointments() {
       filter === "ALL"
         ? appointments
         : appointments.filter((a) => a.status === filter),
-    [appointments, filter]
+    [appointments, filter],
   );
 
   const counts = {
@@ -53,6 +53,7 @@ export default function PatientAppointments() {
     PENDING: appointments.filter((a) => a.status === "PENDING").length,
     APPROVED: appointments.filter((a) => a.status === "APPROVED").length,
     COMPLETED: appointments.filter((a) => a.status === "COMPLETED").length,
+    REJECTED: appointments.filter((a) => a.status === "REJECTED").length,
   };
 
   return (
@@ -61,7 +62,9 @@ export default function PatientAppointments() {
         <div>
           <span className="feature-eyebrow">Appointments</span>
           <h1>My Appointments</h1>
-          <p>Track your appointment requests, approvals and tokens in one place.</p>
+          <p>
+            Track your appointment requests, approvals and tokens in one place.
+          </p>
         </div>
         <button
           className="feature-secondary header-action"
@@ -74,18 +77,39 @@ export default function PatientAppointments() {
       </div>
 
       <div className="feature-stats-row">
-        <div className="feature-stat"><span>Total</span><strong>{counts.ALL}</strong></div>
-        <div className="feature-stat"><span>Pending</span><strong>{counts.PENDING}</strong></div>
-        <div className="feature-stat"><span>Approved</span><strong>{counts.APPROVED}</strong></div>
-        <div className="feature-stat"><span>Completed</span><strong>{counts.COMPLETED}</strong></div>
+        <div className="feature-stat">
+          <span>Total</span>
+          <strong>{counts.ALL}</strong>
+        </div>
+        <div className="feature-stat">
+          <span>Pending</span>
+          <strong>{counts.PENDING}</strong>
+        </div>
+        <div className="feature-stat">
+          <span>Approved</span>
+          <strong>{counts.APPROVED}</strong>
+        </div>
+        <div className="feature-stat">
+          <span>Completed</span>
+          <strong>{counts.COMPLETED}</strong>
+        </div>
       </div>
 
       <div className="feature-filter-row">
         {Object.entries({
-          ALL: "All", PENDING: "Pending", APPROVED: "Approved", COMPLETED: "Completed",
+          ALL: "All",
+          PENDING: "Pending",
+          APPROVED: "Approved",
+          COMPLETED: "Completed",
+          REJECTED: "Rejected",
         }).map(([v, l]) => (
-          <button key={v} className={filter === v ? "active" : ""} onClick={() => setFilter(v)}>
-            {l}<b>{counts[v]}</b>
+          <button
+            key={v}
+            className={filter === v ? "active" : ""}
+            onClick={() => setFilter(v)}
+          >
+            {l}
+            <b>{counts[v]}</b>
           </button>
         ))}
       </div>
@@ -127,10 +151,19 @@ export default function PatientAppointments() {
 
       {/* Cancel Confirmation Modal */}
       {showConfirm && (
-        <div className="confirm-modal-overlay" onClick={() => setShowConfirm(null)}>
+        <div
+          className="confirm-modal-overlay"
+          onClick={() => setShowConfirm(null)}
+        >
           <div className="confirm-modal" onClick={(e) => e.stopPropagation()}>
             <h2>Cancel Appointment?</h2>
-            <p style={{ color: "#64748b", fontSize: "13px", marginBottom: "16px" }}>
+            <p
+              style={{
+                color: "#64748b",
+                fontSize: "13px",
+                marginBottom: "16px",
+              }}
+            >
               Are you sure you want to cancel this appointment with{" "}
               <strong>{showConfirm.doctor}</strong> on{" "}
               <strong>{showConfirm.date}</strong> at{" "}
@@ -150,7 +183,9 @@ export default function PatientAppointments() {
                 onClick={() => handleCancel(showConfirm.id)}
                 disabled={cancelling === showConfirm.id}
               >
-                {cancelling === showConfirm.id ? "Cancelling..." : "Yes, Cancel"}
+                {cancelling === showConfirm.id
+                  ? "Cancelling..."
+                  : "Yes, Cancel"}
               </button>
             </div>
           </div>
@@ -169,7 +204,9 @@ function AppointmentCard({ a, onCancelClick }) {
         <strong>{a.date?.slice?.(8) || "—"}</strong>
         <span>
           {a.date
-            ? new Date(`${a.date}T00:00:00`).toLocaleDateString(undefined, { month: "short" })
+            ? new Date(`${a.date}T00:00:00`).toLocaleDateString(undefined, {
+                month: "short",
+              })
             : "Date"}
         </span>
       </div>
@@ -180,15 +217,23 @@ function AppointmentCard({ a, onCancelClick }) {
             <h3>{a.department || "Hospital Department"}</h3>
             <p>{a.doctor || "Doctor not assigned"}</p>
           </div>
-          <span className={`status-pill status-${String(a.status || "").toLowerCase()}`}>
+          <span
+            className={`status-pill status-${String(a.status || "").toLowerCase()}`}
+          >
             <i className="status-dot" />
             {a.status}
           </span>
         </div>
 
         <div className="appointment-meta">
-          <span><Icon name="clock" size={14} />{a.time || "—"}</span>
-          <span><Icon name="info" size={14} />{a.reason || "No reason provided"}</span>
+          <span>
+            <Icon name="clock" size={14} />
+            {a.time || "—"}
+          </span>
+          <span>
+            <Icon name="info" size={14} />
+            {a.reason || "No reason provided"}
+          </span>
         </div>
 
         {a.status === "APPROVED" && a.token && (

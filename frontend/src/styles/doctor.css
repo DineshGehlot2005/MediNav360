@@ -261,3 +261,604 @@
     min-width: 600px;
   }
 }
+
+/* ============================================================
+   DOCTOR DASHBOARD — READABILITY FIX (Larger Fonts)
+   Overrides too-small fonts in existing doctor.css
+   ============================================================ */
+
+/* ===== HERO ===== */
+.doctor-hero h1 {
+  font-size: 32px !important;
+  letter-spacing: -0.8px;
+}
+
+.doctor-hero p {
+  font-size: 15px !important;
+  margin-top: 8px;
+}
+
+.doctor-hero-message {
+  font-size: 14px !important;
+  line-height: 1.5;
+}
+
+/* ===== STAT CARDS ===== */
+.doctor-stat span,
+.doctor-stat small {
+  font-size: 12px !important;
+  line-height: 1.3;
+}
+
+.doctor-stat strong {
+  font-size: 28px !important;
+  margin: 4px 0 !important;
+}
+
+.doctor-stat {
+  padding: 18px 16px !important;
+  min-height: 115px;
+}
+
+/* ===== PANEL TITLES ===== */
+.doctor-title h2 {
+  font-size: 16px !important;
+  font-weight: 700;
+}
+
+.doctor-title em {
+  font-size: 10px !important;
+  padding: 4px 8px;
+}
+
+.doctor-header-action {
+  font-size: 12px !important;
+  font-weight: 700;
+}
+
+.doctor-panel-header {
+  min-height: 58px;
+  padding: 16px 18px 12px !important;
+}
+
+/* ===== TABLES ===== */
+.doctor-table th {
+  font-size: 11px !important;
+  padding: 12px 16px !important;
+  letter-spacing: 0.04em;
+}
+
+.doctor-table td {
+  font-size: 13px !important;
+  padding: 14px 16px !important;
+}
+
+.doctor-table td strong {
+  font-size: 13px !important;
+}
+
+.doctor-table td small {
+  font-size: 11px !important;
+  margin-top: 4px;
+}
+
+.table-view-btn {
+  font-size: 12px !important;
+  padding: 7px 14px !important;
+}
+
+/* ===== TOKEN PANEL ===== */
+.token-display strong {
+  font-size: 38px !important;
+}
+
+.token-display span {
+  font-size: 13px !important;
+  margin-top: 6px;
+}
+
+.token-meta {
+  font-size: 12px !important;
+  padding: 11px 16px 0 !important;
+}
+
+.doctor-primary-btn,
+.doctor-outline-btn {
+  font-size: 13px !important;
+  min-height: 44px !important;
+  font-weight: 700;
+}
+
+/* ===== QUEUE ROWS ===== */
+.queue-row {
+  grid-template-columns: 70px minmax(80px, 1fr) 60px auto !important;
+  font-size: 12px !important;
+  min-height: 46px !important;
+  padding: 6px 4px;
+  gap: 8px;
+}
+
+.queue-row > strong {
+  font-size: 13px;
+}
+
+.queue-row > span {
+  font-size: 12px;
+}
+
+.queue-row > small {
+  font-size: 11px;
+}
+
+.doctor-status {
+  font-size: 10px !important;
+  padding: 6px 10px !important;
+}
+
+.text-action {
+  font-size: 12px !important;
+  margin: 12px 16px 0;
+}
+
+/* ===== MINI STATS (Patient Stats) ===== */
+.mini-stats b {
+  font-size: 24px !important;
+}
+
+.mini-stats span {
+  font-size: 12px !important;
+}
+
+.real-chart-column span {
+  font-size: 12px !important;
+}
+
+/* ===== DISTRIBUTION RING ===== */
+.distribution-ring.real strong {
+  font-size: 26px !important;
+}
+
+.distribution-ring.real span {
+  font-size: 12px !important;
+}
+
+.distribution-legend div {
+  font-size: 13px !important;
+}
+
+/* ===== QUICK ACTIONS ===== */
+.quick-doctor-action span {
+  font-size: 12px !important;
+  font-weight: 700;
+}
+
+.quick-doctor-action {
+  min-height: 70px !important;
+  padding: 12px !important;
+}
+
+/* ===== NOTIFICATIONS ===== */
+.doctor-notification strong {
+  font-size: 13px !important;
+}
+
+.doctor-notification span {
+  font-size: 12px !important;
+  line-height: 1.4;
+}
+
+.doctor-notification {
+  padding: 14px 16px !important;
+}
+
+/* ===== UPCOMING / RECENT ROWS ===== */
+.upcoming-row strong,
+.recent-row strong {
+  font-size: 13px !important;
+}
+
+.upcoming-row span,
+.recent-row span,
+.recent-row small {
+  font-size: 11px !important;
+}
+
+.doctor-avatar {
+  width: 38px !important;
+  height: 38px !important;
+  font-size: 12px !important;
+}
+
+/* ===== NAVIGATION PANEL ===== */
+.route-controls label {
+  font-size: 11px !important;
+}
+
+.route-controls select {
+  height: 38px !important;
+  font-size: 12px !important;
+}
+
+.route-options button {
+  height: 36px !important;
+  font-size: 11px !important;
+}
+
+.route-metrics {
+  font-size: 11px !important;
+}
+
+.route-metrics b {
+  font-size: 12px !important;
+}
+
+/* ============================================================
+   REQUESTS PAGE — Reject Modal + Toast
+   ============================================================ */
+
+/* ===== TOAST ===== */
+.doctor-toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  animation: slideDown 0.3s ease;
+}
+
+.doctor-toast.success {
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  color: #065f46;
+}
+
+.doctor-toast.warning {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  color: #92400e;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== SMALL MODAL ===== */
+.small-modal {
+  max-width: 520px !important;
+}
+
+.modal-description {
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0 0 18px;
+}
+
+.modal-description strong {
+  color: #1e293b;
+}
+
+/* ===== REJECT REASON CHIPS ===== */
+.reject-reason-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.reason-chip {
+  padding: 8px 14px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: #475569;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.reason-chip:hover {
+  border-color: #3b82f6;
+  color: #3b82f6;
+  background: #eff6ff;
+}
+
+.reason-chip.selected {
+  background: #3b82f6;
+  color: #fff;
+  border-color: #3b82f6;
+  box-shadow: 0 4px 10px rgba(59, 130, 246, 0.25);
+}
+
+.reject-textarea {
+  width: 100%;
+  border: 1px solid #dbe5ef;
+  border-radius: 10px;
+  padding: 12px;
+  font: inherit;
+  font-size: 13px;
+  color: #1e293b;
+  outline: none;
+  resize: vertical;
+  font-family: inherit;
+  transition: 0.18s;
+}
+
+.reject-textarea:focus {
+  border-color: #6da1e5;
+  box-shadow: 0 0 0 3px rgba(76, 133, 212, 0.1);
+}
+
+.reason-counter {
+  display: block;
+  text-align: right;
+  color: #94a3b8;
+  font-size: 11px;
+  margin: 6px 0 0;
+}
+
+/* ===== DANGER BUTTON ===== */
+.danger-btn {
+  background: #fef2f2 !important;
+  border-color: #fecaca !important;
+  color: #dc2626 !important;
+}
+
+.danger-btn:hover:not(:disabled) {
+  background: #fee2e2 !important;
+  border-color: #f87171 !important;
+  color: #b91c1c !important;
+}
+
+.danger-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ===== REQUEST STATUS PILLS (larger) ===== */
+.request-status {
+  font-size: 11px !important;
+  padding: 6px 10px !important;
+  font-weight: 700;
+}
+
+.request-summary span {
+  font-size: 13px !important;
+}
+
+.request-summary strong {
+  font-size: 30px !important;
+}
+
+.request-summary small {
+  font-size: 12px !important;
+}
+
+.request-title-row h3 {
+  font-size: 16px !important;
+}
+
+.request-title-row p {
+  font-size: 14px !important;
+}
+
+.request-meta {
+  font-size: 12px !important;
+}
+
+.request-actions button {
+  font-size: 13px !important;
+  padding: 9px 14px !important;
+}
+
+.doctor-search input {
+  font-size: 13px !important;
+}
+
+.request-filters button {
+  font-size: 13px !important;
+  padding: 9px 14px !important;
+}
+
+/* ============================================================
+   DOCTOR MODALS — Overlay + Container (CRITICAL FIX)
+   ============================================================ */
+
+/* ===== MODAL BACKDROP (dark overlay) ===== */
+.doctor-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ===== MODAL CONTAINER ===== */
+.doctor-modal {
+  background: #fff;
+  border-radius: 16px;
+  max-width: 560px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 24px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.small-modal {
+  max-width: 520px;
+}
+
+/* ===== MODAL HEADER ===== */
+.doctor-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.doctor-modal-header > div > span {
+  display: block;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 6px;
+}
+
+.doctor-modal-header h3 {
+  margin: 0;
+  color: #1e293b;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.doctor-modal-header > button {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  background: #f1f5f9;
+  color: #475569;
+  border-radius: 50%;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: all 0.2s ease;
+}
+
+.doctor-modal-header > button:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+/* ===== MODAL GRID (for appointment details) ===== */
+.doctor-modal-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.doctor-modal-grid > div {
+  background: #f8fafc;
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+
+.doctor-modal-grid > div small {
+  display: block;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 6px;
+}
+
+.doctor-modal-grid > div strong {
+  display: block;
+  color: #1e293b;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.doctor-modal-grid .modal-wide {
+  grid-column: 1 / -1;
+}
+
+/* ===== MODAL ACTIONS ===== */
+.doctor-modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.doctor-modal-actions button {
+  min-height: 44px;
+  padding: 0 20px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.doctor-modal-actions button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ===== REQUEST MODAL (view details) ===== */
+.request-modal {
+  max-width: 600px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 640px) {
+  .doctor-modal {
+    padding: 20px;
+    border-radius: 14px;
+  }
+  .doctor-modal-grid {
+    grid-template-columns: 1fr;
+  }
+  .doctor-modal-actions {
+    flex-direction: column-reverse;
+  }
+  .doctor-modal-actions button {
+    width: 100%;
+  }
+}
+

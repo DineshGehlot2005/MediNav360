@@ -40,30 +40,32 @@ export const api = {
       body: JSON.stringify({ source, destination, mode }),
     }),
 
+  // ===== PATIENT APPOINTMENTS =====
   myAppointments: () => request("/appointments"),
   bookAppointment: (payload) =>
     request("/appointments", { method: "POST", body: JSON.stringify(payload) }),
   cancelAppointment: (id) =>
-  request(`/appointments/${id}`, { method: "DELETE" }),
-    doctors: () => request("/appointments/doctors"),
-  doctorSlots: (doctorId, date) =>
-    request(`/appointments/doctors/${doctorId}/slots?date=${date}`),
-  cancelAppointment: (id) =>
     request(`/appointments/${id}`, { method: "DELETE" }),
+  doctors: () => request("/appointments/doctors"),
   doctorSlots: (doctorId, date) =>
     request(`/appointments/doctors/${doctorId}/slots?date=${date}`),
 
+  // ===== DOCTOR =====
   doctorAppointments: (status) =>
     request(`/doctor/appointments${status ? `?status=${status}` : ""}`),
   approve: (id) =>
     request(`/doctor/appointments/${id}/approve`, { method: "POST" }),
-  reject: (id) =>
-    request(`/doctor/appointments/${id}/reject`, { method: "POST" }),
+  reject: (id, reason) =>
+    request(`/doctor/appointments/${id}/reject`, {
+      method: "POST",
+      body: JSON.stringify({ reason }),
+    }),
   complete: (id) =>
     request(`/doctor/appointments/${id}/complete`, { method: "POST" }),
   callNext: () => request("/doctor/token/next", { method: "POST" }),
   queue: () => request("/doctor/queue"),
 
+  // ===== ADMIN =====
   adminStats: () => request("/admin/statistics"),
   adminPatients: (q = "") =>
     request(`/admin/patients${q ? `?q=${encodeURIComponent(q)}` : ""}`),
@@ -71,13 +73,16 @@ export const api = {
     request(`/admin/doctors${q ? `?q=${encodeURIComponent(q)}` : ""}`),
   adminAppointments: (status = "") =>
     request(
-      `/admin/appointments${status ? `?status=${encodeURIComponent(status)}` : ""}`,
+      `/admin/appointments${status ? `?status=${encodeURIComponent(status)}` : ""}`
     ),
   adminDepartments: () => request("/admin/departments"),
   adminAnalytics: () => request("/admin/analytics"),
   adminUsers: (q = "", role = "") =>
     request(
-      `/admin/users?${new URLSearchParams({ ...(q ? { q } : {}), ...(role ? { role } : {}) }).toString()}`,
+      `/admin/users?${new URLSearchParams({
+        ...(q ? { q } : {}),
+        ...(role ? { role } : {}),
+      }).toString()}`
     ),
   adminUserStatus: (id, active) =>
     request(`/admin/users/${id}/status`, {
