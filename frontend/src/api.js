@@ -21,6 +21,12 @@ export const api = {
     }),
   logout: () => request("/auth/logout", { method: "POST" }),
   me: () => request("/auth/me"),
+  getProfile: () => request("/auth/profile"),
+  updateProfile: (payload) =>
+    request("/auth/profile", {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    }),
   register: (payload) =>
     request("/auth/register", {
       method: "POST",
@@ -73,7 +79,7 @@ export const api = {
     request(`/admin/doctors${q ? `?q=${encodeURIComponent(q)}` : ""}`),
   adminAppointments: (status = "") =>
     request(
-      `/admin/appointments${status ? `?status=${encodeURIComponent(status)}` : ""}`
+      `/admin/appointments${status ? `?status=${encodeURIComponent(status)}` : ""}`,
     ),
   adminDepartments: () => request("/admin/departments"),
   adminAnalytics: () => request("/admin/analytics"),
@@ -82,7 +88,7 @@ export const api = {
       `/admin/users?${new URLSearchParams({
         ...(q ? { q } : {}),
         ...(role ? { role } : {}),
-      }).toString()}`
+      }).toString()}`,
     ),
   adminUserStatus: (id, active) =>
     request(`/admin/users/${id}/status`, {
