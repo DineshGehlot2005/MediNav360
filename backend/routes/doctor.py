@@ -68,7 +68,12 @@ def reject(appt_id):
     if a.status != "PENDING":
         return jsonify(success=False, error="Appointment is not pending"), 400
 
+    data = request.get_json() or {}
+    reason = (data.get("reason") or "").strip()
+
     a.status = "REJECTED"
+    if reason:
+        a.notes = f"Rejected: {reason}"
     db.session.commit()
     return jsonify(success=True, status=a.status)
 

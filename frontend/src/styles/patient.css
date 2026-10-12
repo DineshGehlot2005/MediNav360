@@ -1120,3 +1120,359 @@
     justify-content: center;
   }
 }
+
+/* ============================================================
+   PATIENT DASHBOARD — READABILITY FIX (Larger Fonts)
+   ============================================================ */
+
+/* ===== WELCOME CARD ===== */
+.welcome-copy h1 {
+  font-size: clamp(26px, 2.4vw, 32px) !important;
+  letter-spacing: -0.9px;
+}
+
+.welcome-copy p {
+  font-size: 15px !important;
+  margin-top: 8px;
+}
+
+.welcome-meta {
+  font-size: 14px !important;
+  gap: 11px;
+}
+
+.welcome-meta svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* ===== SECTION TITLES ===== */
+.section-title h2 {
+  font-size: 16px !important;
+  font-weight: 800;
+}
+
+.section-title svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* ===== NEXT APPOINTMENT CARD ===== */
+.next-appointment-inner {
+  padding: 20px !important;
+}
+
+.next-doctor h3 {
+  font-size: 19px !important;
+}
+
+.next-doctor p {
+  font-size: 14px !important;
+  margin: 5px 0;
+}
+
+.next-doctor span {
+  font-size: 12px !important;
+}
+
+.department-icon {
+  width: 58px;
+  height: 58px;
+}
+
+.department-icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+.next-details {
+  font-size: 13px !important;
+  gap: 9px;
+}
+
+.next-details svg {
+  width: 18px;
+  height: 18px;
+}
+
+.token-row b {
+  font-size: 13px !important;
+  padding: 5px 10px;
+}
+
+.next-actions .btn {
+  font-size: 13px !important;
+  min-height: 44px;
+}
+
+.light-empty strong {
+  font-size: 16px !important;
+}
+
+.light-empty span {
+  font-size: 13px !important;
+}
+
+/* ===== STAT CARDS ===== */
+.stat-card {
+  padding: 18px 16px !important;
+  min-height: 110px;
+}
+
+.stat-icon {
+  width: 44px !important;
+  height: 44px !important;
+}
+
+.stat-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.stat-copy span {
+  font-size: 12px !important;
+  font-weight: 600;
+}
+
+.stat-copy strong {
+  font-size: 26px !important;
+  font-weight: 800;
+  margin: 4px 0;
+}
+
+.stat-copy small {
+  font-size: 11px !important;
+}
+
+/* ===== PANEL HEADINGS ===== */
+.panel-heading {
+  padding: 18px 20px 13px !important;
+}
+
+.panel-heading button {
+  font-size: 12px !important;
+  font-weight: 700;
+}
+
+/* ===== APPOINTMENT ROWS ===== */
+.appointment-row {
+  min-height: 76px !important;
+  padding: 14px 20px !important;
+}
+
+.row-icon {
+  width: 42px !important;
+  height: 42px !important;
+}
+
+.row-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.appointment-person strong,
+.appointment-time strong {
+  font-size: 14px !important;
+  font-weight: 700;
+}
+
+.appointment-person span,
+.appointment-time span {
+  font-size: 12px !important;
+  margin-top: 2px;
+}
+
+/* ===== AI PANEL ===== */
+.ai-heading h2 {
+  font-size: 16px !important;
+}
+
+.ai-icon {
+  width: 42px;
+  height: 42px;
+}
+
+.ai-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.ai-panel > p {
+  font-size: 13px !important;
+  margin: 14px 0 12px;
+  line-height: 1.55;
+}
+
+.ai-input {
+  height: 80px !important;
+  font-size: 13px !important;
+  padding: 13px !important;
+}
+
+.ai-input small {
+  font-size: 11px !important;
+}
+
+.ai-panel .btn {
+  font-size: 13px !important;
+  min-height: 46px;
+  margin-top: 12px;
+}
+
+.ai-note {
+  font-size: 11px !important;
+  line-height: 1.5;
+  margin-top: 12px;
+}
+
+/* ===== NOTIFICATIONS PANEL ===== */
+.notification-row {
+  padding: 14px 18px !important;
+}
+
+.notification-icon {
+  width: 40px !important;
+  height: 40px !important;
+}
+
+.notification-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.notification-row strong {
+  font-size: 13px !important;
+  font-weight: 700;
+}
+
+.notification-row span {
+  font-size: 12px !important;
+  margin-top: 3px;
+}
+
+.empty-state {
+  padding: 28px 20px !important;
+  font-size: 13px !important;
+}
+
+/* ===== QUICK ACTIONS ===== */
+.quick-panel {
+  padding: 20px !important;
+}
+
+.quick-grid {
+  gap: 12px !important;
+  margin-top: 14px;
+}
+
+.quick-action {
+  min-height: 120px !important;
+  padding: 16px !important;
+}
+
+.quick-icon {
+  width: 44px !important;
+  height: 44px !important;
+  margin-bottom: 12px;
+}
+
+.quick-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.quick-action strong {
+  font-size: 13px !important;
+  font-weight: 800;
+}
+
+.quick-action span {
+  font-size: 11px !important;
+  margin-top: 5px;
+  line-height: 1.4;
+}
+
+/* ===== HEALTH BANNER ===== */
+.health-banner {
+  padding: 16px 20px !important;
+  min-height: 76px;
+}
+
+.health-icon {
+  width: 42px;
+  height: 42px;
+}
+
+.health-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.health-banner strong {
+  font-size: 13px !important;
+  font-weight: 700;
+}
+
+.health-banner span {
+  font-size: 11px !important;
+  margin-top: 3px;
+}
+
+.health-banner button {
+  font-size: 12px !important;
+  font-weight: 700;
+}
+
+/* ============================================================
+   PATIENT APPOINTMENTS PAGE — Card fonts
+   ============================================================ */
+
+.appointment-date strong {
+  font-size: 22px !important;
+}
+
+.appointment-date span {
+  font-size: 10px !important;
+}
+
+.appointment-title-row h3 {
+  font-size: 16px !important;
+}
+
+.appointment-title-row p {
+  font-size: 13px !important;
+}
+
+.appointment-meta {
+  font-size: 12px !important;
+  margin-top: 12px;
+}
+
+.appointment-meta svg {
+  width: 14px;
+  height: 14px;
+}
+
+.token-highlight {
+  font-size: 12px !important;
+  padding: 9px 12px;
+}
+
+.token-highlight strong {
+  font-size: 14px;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 640px) {
+  .welcome-copy h1 {
+    font-size: 22px !important;
+  }
+  .stat-copy strong {
+    font-size: 22px !important;
+  }
+  .quick-action {
+    min-height: 100px !important;
+  }
+}
