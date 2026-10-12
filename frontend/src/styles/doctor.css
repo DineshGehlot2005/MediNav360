@@ -862,3 +862,306 @@
   }
 }
 
+/* ============================================================
+   PATIENT DETAIL MODAL (Doctor view)
+   ============================================================ */
+
+.clickable-row {
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.clickable-row:hover td {
+  background: #f0f7ff;
+}
+
+.patient-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.patient-mini-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  background: linear-gradient(145deg, #dbeafe, #93c5fd);
+  color: #1e40af;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+/* ===== MODAL WRAPPER ===== */
+.patient-detail-modal {
+  max-width: 620px;
+}
+
+.modal-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 60px 20px;
+  color: #64748b;
+  font-size: 14px;
+}
+
+/* ===== HEAD ===== */
+.patient-detail-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.patient-detail-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(145deg, #dbeafe, #93c5fd);
+  color: #1e40af;
+  font-size: 18px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.patient-detail-sub {
+  margin: 3px 0 0;
+  color: #64748b;
+  font-size: 12px;
+}
+
+/* ===== BLOOD GROUP BANNER ===== */
+.blood-group-banner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  background: linear-gradient(135deg, #fef2f2, #fee2e2);
+  border: 2px solid #fecaca;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.blood-group-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: #fff;
+  font-size: 26px;
+  flex-shrink: 0;
+}
+
+.blood-group-copy {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.blood-group-copy span {
+  color: #b91c1c;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.blood-group-copy strong {
+  color: #7f1d1d;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.blood-group-warning {
+  padding: 4px 10px;
+  background: #fff;
+  color: #b45309;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 20px;
+  border: 1px solid #fde68a;
+}
+
+/* ===== DETAIL SECTIONS ===== */
+.detail-section {
+  margin-bottom: 20px;
+}
+
+.detail-section h4 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 10px;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.detail-item {
+  background: #f8fafc;
+  border-radius: 10px;
+  padding: 10px 14px;
+  border: 1px solid #e2e8f0;
+}
+
+.detail-item small {
+  display: block;
+  color: #94a3b8;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+  letter-spacing: 0.04em;
+}
+
+.detail-item strong {
+  color: #1e293b;
+  font-size: 14px;
+  font-weight: 600;
+  word-break: break-word;
+}
+
+.detail-text {
+  margin: 0;
+  padding: 12px 14px;
+  background: #f8fafc;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  color: #334155;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* ===== EMERGENCY SECTION ===== */
+.emergency-section {
+  background: #fff7ed;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid #fed7aa;
+}
+
+.emergency-section h4 {
+  color: #c2410c;
+  margin-bottom: 8px;
+}
+
+.emergency-value strong {
+  color: #7c2d12;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+}
+
+.missing-info {
+  color: #94a3b8;
+  font-size: 13px;
+  font-style: italic;
+}
+
+/* ===== VISIT STATS ===== */
+.visit-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.visit-stat {
+  padding: 14px;
+  background: #f0f9ff;
+  border-radius: 10px;
+  border: 1px solid #bae6fd;
+  text-align: center;
+}
+
+.visit-stat strong {
+  display: block;
+  color: #0c4a6e;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.visit-stat span {
+  display: block;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ===== APPOINTMENT HISTORY ===== */
+.appt-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.appt-history-row {
+  display: grid;
+  grid-template-columns: 100px 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 14px;
+  background: #f8fafc;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+}
+
+.appt-history-date strong {
+  display: block;
+  color: #1e293b;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.appt-history-date span {
+  display: block;
+  color: #94a3b8;
+  font-size: 11px;
+  margin-top: 2px;
+}
+
+.appt-history-reason {
+  color: #475569;
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 640px) {
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+  .visit-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+  .appt-history-row {
+    grid-template-columns: 90px 1fr;
+  }
+  .appt-history-row .status-pill {
+    grid-column: 1 / -1;
+    justify-self: flex-start;
+  }
+  .blood-group-copy strong {
+    font-size: 20px;
+  }
+}
