@@ -6,7 +6,26 @@ bp = Blueprint("auth", __name__, url_prefix="/api/auth")
 
 
 def user_to_dict(u: User):
-    return {"id": u.id, "name": u.name, "email": u.email, "role": u.role}
+    return {
+        "id": u.id,
+        "name": u.name,
+        "email": u.email,
+        "phone": u.phone,
+        "role": u.role,
+    }
+
+
+def patient_to_dict(p: Patient):
+    if not p:
+        return {}
+    return {
+        "id": p.id,
+        "date_of_birth": p.date_of_birth,
+        "gender": p.gender,
+        "address": p.address,
+        "blood_group": p.blood_group,
+        "emergency_contact": p.emergency_contact,
+    }
 
 
 @bp.post("/register")
@@ -18,13 +37,22 @@ def register():
     if User.query.filter_by(email=data["email"]).first():
         return jsonify(success=False, error="Email already registered"), 409
 
-    u = User(name=data["name"], email=data["email"], phone=data["phone"], role="PATIENT")
+    u = User(
+        name=data["name"],
+        email=data["email"],
+        phone=data["phone"],
+        role="PATIENT",
+    )
     u.set_password(data["password"])
     db.session.add(u)
     db.session.flush()
+
     db.session.add(Patient(
-        user_id=u.id, date_of_birth=data.get("date_of_birth"), gender=data.get("gender"),
-        address=data.get("address"), blood_group=data.get("blood_group"),
+        user_id=u.id,
+        date_of_birth=data.get("date_of_birth"),
+        gender=data.get("gender"),
+        address=data.get("address"),
+        blood_group=data.get("blood_group"),
         emergency_contact=data.get("emergency_contact"),
     ))
     db.session.commit()
@@ -52,4 +80,52 @@ def logout():
 @bp.get("/me")
 @login_required
 def me():
+    return jsonify(success=True, user=user_to_dict(current_user))
+
+
+# ===== PROFILE: Get full profile =====
+@bp.get("/profile")
+@login_required
+def get_profile():
+    user_data = user_to_dict(current_user)
+    patient_data = None
+
+    if current_user.role == "PATIENT":
+        p = Patient.query.filter_by(user_id=current_user.id).first()
+        patient_data = patient_to_dict(p)
+
+    return jsonify(success=True, user=user_data, patient=patient_data)
+
+
+# ===== PROFILE: Update profile =====
+@bp.put("/profile")
+@login_required
+def update_profile():
+    data = request.get_json() or {}
+
+    # Update User fields
+    if "name" in data and data["name"].strip():
+        current_user.name = data["name"].strip()
+    if "phone" in data:
+        current_user.phone = (data["phone"] or "").strip()
+
+    # Update Patient fields (only for patients)
+    if current_user.role == "PATIENT":
+        p = Patient.query.filter_by(user_id=current_user.id).first()
+        if not p:
+            p = Patient(user_id=current_user.id)
+            db.session.add(p)
+
+        if "date_of_birth" in data:
+            p.date_of_birth = data["date_of_birth"] or None
+        if "gender" in data:
+            p.gender = data["gender"] or None
+        if "address" in data:
+            p.address = data["address"] or None
+        if "blood_group" in data:
+            p.blood_group = data["blood_group"] or None
+        if "emergency_contact" in data:
+            p.emergency_contact = data["emergency_contact"] or None
+
+    db.session.commit()
     return jsonify(success=True, user=user_to_dict(current_user))
