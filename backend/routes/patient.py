@@ -2,6 +2,7 @@ from datetime import datetime
 from flask import Blueprint, request, jsonify
 from flask_login import login_required, current_user
 from database.models import db, Patient, Doctor, Appointment, Token
+from routes.notifications import create_notification
 
 bp = Blueprint("patient", __name__, url_prefix="/api/appointments")
 
@@ -95,6 +96,15 @@ def create_appointment():
     )
     db.session.add(appt)
     db.session.commit()
+
+    # Notify doctor about new request
+    create_notification(
+        doctor.user_id,
+        f"New appointment request from {patient.user.name} on {date_} at {time_}.",
+        "appointment_request",
+    )
+    db.session.commit()
+
     return jsonify(success=True, appointment=appointment_to_dict(appt))
 
 
@@ -156,6 +166,7 @@ def doctor_slots(doctor_id):
     booked_times = [a.appointment_time for a in booked]
     return jsonify(success=True, booked=booked_times)
 
+
 @bp.delete("/<int:appointment_id>")
 @login_required
 def cancel_appointment(appointment_id):
@@ -177,6 +188,67 @@ def cancel_appointment(appointment_id):
             error="Only pending or approved appointments can be cancelled",
         ), 400
 
+    # Save details before status change
+    doctor_user_id = appt.doctor.user_id
+    appt_date = appt.appointment_date
+    appt_time = appt.appointment_time
+
     appt.status = "CANCELLED"
     db.session.commit()
+
+    # Notify doctor about cancellation
+    create_notification(
+        doctor_user_id,
+        f"{patient.user.name} cancelled their appointment on {appt_date} at {appt_time}.",
+        "appointment_cancelled",
+    )
+    db.session.commit()
+
     return jsonify(success=True)
+
+
+import json
+
+
+@bp.get("/<int:appointment_id>/prescription")
+@login_required
+def get_prescription_patient(appointment_id):
+    """Patient reads their own prescription."""
+    patient = require_patient()
+    if not patient:
+        return jsonify(success=False, error="Patient access only"), 403
+
+    a = Appointment.query.filter_by(
+        id=appointment_id, patient_id=patient.id
+    ).first()
+    if not a:
+        return jsonify(success=False, error="Appointment not found"), 404
+
+    from database.models import Prescription
+
+    rx = Prescription.query.filter_by(appointment_id=appointment_id).first()
+    if not rx:
+        return jsonify(success=True, prescription=None)
+
+    try:
+        meds = json.loads(rx.medicines or "[]")
+    except (ValueError, TypeError):
+        meds = []
+
+    return jsonify(
+        success=True,
+        prescription={
+            "id": rx.id,
+            "diagnosis": rx.diagnosis,
+            "medicines": meds,
+            "advice": rx.advice,
+            "follow_up_date": rx.follow_up_date,
+            "created_at": rx.created_at.isoformat() if rx.created_at else None,
+            "doctor_name": rx.doctor.user.name if rx.doctor else None,
+            "doctor_qualification": rx.doctor.qualification if rx.doctor else None,
+            "doctor_specialization": rx.doctor.specialization if rx.doctor else None,
+            "patient_name": patient.user.name,
+            "appointment_date": a.appointment_date,
+            "appointment_time": a.appointment_time,
+        },
+    )

@@ -141,3 +141,18 @@ class Feedback(db.Model):
     overall_rating = db.Column(db.Integer)
     comment = db.Column(db.String(500))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class Prescription(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    appointment_id = db.Column(db.Integer, db.ForeignKey("appointment.id"), nullable=False)
+    doctor_id = db.Column(db.Integer, db.ForeignKey("doctor.id"), nullable=False)
+    patient_id = db.Column(db.Integer, db.ForeignKey("patient.id"), nullable=False)
+    diagnosis = db.Column(db.String(500))
+    medicines = db.Column(db.Text)  # JSON string — list of {name, dosage, duration, notes}
+    advice = db.Column(db.String(500))
+    follow_up_date = db.Column(db.String(20))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    appointment = db.relationship("Appointment")
+    doctor = db.relationship("Doctor")
+    patient = db.relationship("Patient")

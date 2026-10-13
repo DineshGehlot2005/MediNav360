@@ -27,7 +27,7 @@ import AdminAnalytics from "./pages/admin/Analytics.jsx";
 import AdminUsers from "./pages/admin/Users.jsx";
 import AdminNavigation from "./pages/admin/Navigation.jsx";
 
-function AppTopbar({ user, role, roleLabel, placeholder, onNavigate }) {
+function AppTopbar({ user, role, roleLabel, placeholder, onNavigate, notificationCount = 0 }) {
   const [query, setQuery] = useState("");
   const initials = (user?.name || "User")
     .split(" ")
@@ -116,13 +116,17 @@ function AppTopbar({ user, role, roleLabel, placeholder, onNavigate }) {
         )}
       </div>
       <div className="topbar-actions">
-        <button
+                <button
           className="icon-button notification-button"
           aria-label="Notifications"
           onClick={() => onNavigate("notifications")}
         >
           <Icon name="bell" size={21} />
-          <span>•</span>
+          {notificationCount > 0 && (
+            <span className="notification-badge-count">
+              {notificationCount > 99 ? "99+" : notificationCount}
+            </span>
+          )}
         </button>
         <div className="topbar-divider" />
         <button
@@ -147,8 +151,9 @@ export default function App() {
   const [checking, setChecking] = useState(true);
   const [tab, setTab] = useState("dashboard");
   const [navDestination, setNavDestination] = useState("");
+  const [notificationCount, setNotificationCount] = useState(0);
 
-  useEffect(() => {
+     useEffect(() => {
     api
       .me()
       .then((r) => setUser(r.user))
@@ -156,9 +161,41 @@ export default function App() {
       .finally(() => setChecking(false));
   }, []);
 
-  function handleNavigate(nextTab, options = {}) {
+  // Poll unread notification count every 30s
+  useEffect(() => {
+    if (!user) {
+      setNotificationCount(0);
+      return;
+    }
+    let cancelled = false;
+    async function fetchCount() {
+      try {
+        const r = await api.notificationUnreadCount();
+        if (!cancelled) setNotificationCount(r.unread_count || 0);
+      } catch {
+        // silent
+      }
+    }
+    fetchCount();
+    const interval = setInterval(fetchCount, 30000);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, [user]);
+
+    function handleNavigate(nextTab, options = {}) {
     setTab(nextTab);
     if (nextTab === "nav") setNavDestination(options.destination || "");
+    if (nextTab === "notifications") {
+      // Refresh count after a small delay (let page load)
+      setTimeout(() => {
+        api
+          .notificationUnreadCount()
+          .then((r) => setNotificationCount(r.unread_count || 0))
+          .catch(() => {});
+      }, 500);
+    }
   }
 
   async function handleLogout() {
@@ -215,6 +252,7 @@ export default function App() {
           roleLabel={patient ? "Patient" : doctor ? "Doctor" : "Administrator"}
           placeholder={placeholder}
           onNavigate={handleNavigate}
+          notificationCount={notificationCount}
         />
         <div className="page-content">
           {patient && (

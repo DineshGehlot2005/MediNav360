@@ -1,8 +1,11 @@
 from datetime import datetime, date
 from flask import Blueprint, request, jsonify
+from routes.notifications import create_notification
 from flask_login import login_required, current_user
 from database.models import db, Doctor, Appointment, Token
 from services.token_service import generate_token, call_next
+
+import json
 
 bp = Blueprint("doctor", __name__, url_prefix="/api/doctor")
 
@@ -56,7 +59,18 @@ def approve(appt_id):
     a.status = "APPROVED"
     a.approved_at = datetime.utcnow()
     db.session.commit()
+
+    # Token generate karo
     token = generate_token(a)
+
+    # Notify patient
+    create_notification(
+        a.patient.user_id,
+        f"Your appointment with {doctor.user.name} on {a.appointment_date} at {a.appointment_time} is confirmed. Token: {token.token_number}",
+        "appointment_approved",
+    )
+    db.session.commit()
+
     return jsonify(success=True, status=a.status, token=token.token_number)
 
 
@@ -77,6 +91,16 @@ def reject(appt_id):
     if reason:
         a.notes = f"Rejected: {reason}"
     db.session.commit()
+
+    # Notify patient
+    reason_text = f" Reason: {reason}" if reason else ""
+    create_notification(
+        a.patient.user_id,
+        f"Your appointment with {doctor.user.name} on {a.appointment_date} at {a.appointment_time} was not approved.{reason_text}",
+        "appointment_rejected",
+    )
+    db.session.commit()
+
     return jsonify(success=True, status=a.status)
 
 
@@ -90,6 +114,15 @@ def complete(appt_id):
     a.status = "COMPLETED"
     a.completed_at = datetime.utcnow()
     db.session.commit()
+
+    # Notify patient
+    create_notification(
+        a.patient.user_id,
+        f"Your appointment with {doctor.user.name} on {a.appointment_date} has been completed. Thank you for visiting.",
+        "appointment_completed",
+    )
+    db.session.commit()
+
     return jsonify(success=True, status=a.status)
 
 
@@ -174,5 +207,111 @@ def patient_detail(patient_id):
                 }
                 for a in appts
             ],
+        },
+    )
+
+
+@bp.post("/appointments/<int:appt_id>/prescription")
+@login_required
+def save_prescription(appt_id):
+    """Create or update a prescription for an appointment."""
+    doctor = require_doctor()
+    if not doctor:
+        return jsonify(success=False, error="Only doctors can write prescriptions"), 403
+
+    a = Appointment.query.get_or_404(appt_id)
+    if a.doctor_id != doctor.id:
+        return jsonify(success=False, error="Not authorized"), 403
+
+    if a.status not in ("APPROVED", "COMPLETED"):
+        return jsonify(success=False, error="Prescription can only be written for approved or completed appointments"), 400
+
+    data = request.get_json() or {}
+    medicines = data.get("medicines") or []
+
+    if not data.get("diagnosis", "").strip():
+        return jsonify(success=False, error="Diagnosis is required"), 400
+    if not medicines or not any(m.get("name", "").strip() for m in medicines):
+        return jsonify(success=False, error="At least one medicine is required"), 400
+
+    from database.models import Prescription
+
+    rx = Prescription.query.filter_by(appointment_id=appt_id).first()
+    is_new = False
+    if not rx:
+        rx = Prescription(
+            appointment_id=appt_id,
+            doctor_id=doctor.id,
+            patient_id=a.patient_id,
+        )
+        db.session.add(rx)
+        is_new = True
+
+    rx.diagnosis = data["diagnosis"].strip()
+    rx.medicines = json.dumps([
+        {
+            "name": (m.get("name") or "").strip(),
+            "dosage": (m.get("dosage") or "").strip(),
+            "duration": (m.get("duration") or "").strip(),
+            "notes": (m.get("notes") or "").strip(),
+        }
+        for m in medicines
+        if (m.get("name") or "").strip()
+    ])
+    rx.advice = (data.get("advice") or "").strip() or None
+    rx.follow_up_date = (data.get("follow_up_date") or "").strip() or None
+
+    db.session.commit()
+
+    # Notify patient only when prescription is NEWLY created (not on every edit)
+    if is_new:
+        create_notification(
+            a.patient.user_id,
+            f"Prescription from {doctor.user.name} is ready for your appointment on {a.appointment_date}. Click to view.",
+            "prescription_ready",
+        )
+        db.session.commit()
+
+    return jsonify(success=True, prescription_id=rx.id)
+
+
+@bp.get("/appointments/<int:appt_id>/prescription")
+@login_required
+def get_prescription_doctor(appt_id):
+    """Doctor reads a prescription they wrote."""
+    doctor = require_doctor()
+    if not doctor:
+        return jsonify(success=False, error="Only doctors can view this"), 403
+
+    a = Appointment.query.get_or_404(appt_id)
+    if a.doctor_id != doctor.id:
+        return jsonify(success=False, error="Not authorized"), 403
+
+    from database.models import Prescription
+
+    rx = Prescription.query.filter_by(appointment_id=appt_id).first()
+    if not rx:
+        return jsonify(success=True, prescription=None)
+
+    try:
+        meds = json.loads(rx.medicines or "[]")
+    except (ValueError, TypeError):
+        meds = []
+
+    return jsonify(
+        success=True,
+        prescription={
+            "id": rx.id,
+            "diagnosis": rx.diagnosis,
+            "medicines": meds,
+            "advice": rx.advice,
+            "follow_up_date": rx.follow_up_date,
+            "created_at": rx.created_at.isoformat() if rx.created_at else None,
+            "doctor_name": doctor.user.name,
+            "doctor_qualification": doctor.qualification,
+            "doctor_specialization": doctor.specialization,
+            "patient_name": a.patient.user.name,
+            "appointment_date": a.appointment_date,
+            "appointment_time": a.appointment_time,
         },
     )
