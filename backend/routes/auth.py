@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+import os
 from flask_login import login_user, logout_user, login_required, current_user
 from database.models import db, User, Patient
 
@@ -188,3 +189,14 @@ def update_profile():
 
     db.session.commit()
     return jsonify(success=True, user=user_to_dict(current_user))
+
+@bp.get("/config")
+def get_config():
+    """Return public config — used by frontend to decide what to show."""
+    env = os.environ.get("ENVIRONMENT", "development").lower()
+    return jsonify(
+        success=True,
+        environment=env,
+        is_production=(env == "production"),
+        is_development=(env == "development"),
+    )

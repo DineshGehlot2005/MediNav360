@@ -21,6 +21,7 @@ export const api = {
     }),
   logout: () => request("/auth/logout", { method: "POST" }),
   me: () => request("/auth/me"),
+  getConfig: () => request("/auth/config"),
   getProfile: () => request("/auth/profile"),
   updateProfile: (payload) =>
     request("/auth/profile", {
