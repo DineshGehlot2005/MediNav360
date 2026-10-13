@@ -1,43 +1,222 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { api } from "../../api.js";
 import Icon from "../../components/Icon.jsx";
 
-function item(icon, tone, title, text, time="Now") { return { icon, tone, title, text, time }; }
+// Notification type → icon + tone mapping
+const TYPE_META = {
+  appointment_request: { icon: "calendar", tone: "blue", label: "New Request" },
+  appointment_approved: { icon: "check", tone: "green", label: "Approved" },
+  appointment_rejected: { icon: "info", tone: "red", label: "Rejected" },
+  appointment_completed: { icon: "check", tone: "purple", label: "Completed" },
+  appointment_cancelled: { icon: "info", tone: "orange", label: "Cancelled" },
+  prescription_ready: { icon: "file", tone: "green", label: "Prescription" },
+  general: { icon: "bell", tone: "blue", label: "Info" },
+};
 
-export default function Notifications({ role }) {
+function timeAgo(iso) {
+  if (!iso) return "";
+  const then = new Date(iso).getTime();
+  const diff = Math.floor((Date.now() - then) / 1000);
+  if (diff < 60) return "Just now";
+  if (diff < 3600) return `${Math.floor(diff / 60)} min ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)} hr ago`;
+  if (diff < 604800) return `${Math.floor(diff / 86400)} d ago`;
+  return new Date(iso).toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "short",
+  });
+}
+
+// Category filter — user ke liye simple
+function getCategory(type) {
+  if (!type) return "general";
+  if (type.startsWith("appointment")) return "appointments";
+  if (type === "prescription_ready") return "prescriptions";
+  return "general";
+}
+
+export default function Notifications({ role, onNavigate }) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    async function load() {
-      try {
-        if (role === "DOCTOR") {
-          const [a, q] = await Promise.all([api.doctorAppointments(), api.queue()]);
-          const appointments = a.appointments || [], tokens = q.tokens || [];
-          const pending = appointments.filter(x => x.status === "PENDING");
-          const current = tokens.find(x => ["IN_PROGRESS", "CALLED"].includes(x.status));
-          setItems([
-            ...pending.slice(0, 3).map(x => item("calendar","blue","New appointment request",`${x.patient} requested ${x.date} at ${x.time}.`)),
-            ...(current ? [item("bell","green",`Token ${current.token_number} is ready`,`${current.patient || "Patient"} is currently in the queue.`)] : []),
-            item("info","purple","Appointment summary",`${appointments.filter(x=>x.status==="COMPLETED").length} completed and ${appointments.filter(x=>x.status==="APPROVED").length} approved appointments.`),
-          ]);
-        } else {
-          const r = await api.myAppointments();
-          const appointments = r.appointments || [];
-          setItems([
-            ...appointments.filter(x => x.status === "APPROVED").slice(0,3).map(x => item("check","green","Appointment approved",`${x.department} with ${x.doctor} • ${x.date} ${x.time}`)),
-            ...appointments.filter(x => x.status === "PENDING").slice(0,3).map(x => item("clock","blue","Appointment awaiting approval",`${x.department} with ${x.doctor} • ${x.date} ${x.time}`)),
-            ...appointments.filter(x => x.status === "REJECTED").slice(0,2).map(x => item("info","red","Appointment not approved",`${x.department} • ${x.date} ${x.time}`)),
-          ]);
-        }
-      } catch { setItems([]); } finally { setLoading(false); }
-    }
-    load();
-  }, [role]);
+  const [error, setError] = useState("");
+  const [filter, setFilter] = useState("ALL");
 
-  return <div className="app-feature-page"><div className="feature-page-header"><div><span className="feature-eyebrow">Updates</span><h1>Notifications</h1><p>Important appointment and queue updates for your account.</p></div><div className="feature-round-icon"><Icon name="bell" size={24}/></div></div>
-    <section className="feature-card notification-list-card">
-      <div className="feature-card-title"><Icon name="bell" size={18}/><h2>Recent Notifications</h2><span className="feature-count">{items.length}</span></div>
-      {loading ? <div className="feature-empty">Loading notifications...</div> : items.length ? items.map((n,i)=><div className="feature-notification" key={`${n.title}-${i}`}><div className={`feature-notification-icon ${n.tone}`}><Icon name={n.icon} size={18}/></div><div className="feature-notification-copy"><strong>{n.title}</strong><span>{n.text}</span></div><small>{n.time}</small></div>) : <div className="feature-empty"><Icon name="check" size={28}/><strong>You're all caught up.</strong><span>No new notifications right now.</span></div>}
-    </section>
-  </div>;
+  async function load() {
+    setLoading(true);
+    setError("");
+    try {
+      const r = await api.notifications();
+      setItems(r.notifications || []);
+    } catch (e) {
+      setError(e.message || "Unable to load notifications");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    load();
+    // Poll every 30s for fresh notifications
+    const interval = setInterval(load, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const counts = useMemo(() => {
+    const all = items.length;
+    const unread = items.filter((n) => !n.is_read).length;
+    const appointments = items.filter(
+      (n) => getCategory(n.type) === "appointments"
+    ).length;
+    const prescriptions = items.filter(
+      (n) => getCategory(n.type) === "prescriptions"
+    ).length;
+    return { ALL: all, UNREAD: unread, APPOINTMENTS: appointments, PRESCRIPTIONS: prescriptions };
+  }, [items]);
+
+  const filtered = useMemo(() => {
+    if (filter === "ALL") return items;
+    if (filter === "UNREAD") return items.filter((n) => !n.is_read);
+    if (filter === "APPOINTMENTS")
+      return items.filter((n) => getCategory(n.type) === "appointments");
+    if (filter === "PRESCRIPTIONS")
+      return items.filter((n) => getCategory(n.type) === "prescriptions");
+    return items;
+  }, [items, filter]);
+
+  async function handleRead(item) {
+    if (item.is_read) return;
+    try {
+      await api.markNotificationRead(item.id);
+      setItems((prev) =>
+        prev.map((n) => (n.id === item.id ? { ...n, is_read: true } : n))
+      );
+      if (item.type === "prescription_ready") {
+        onNavigate?.("appointments");
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  async function handleReadAll() {
+    if (counts.UNREAD === 0) return;
+    try {
+      await api.markAllNotificationsRead();
+      setItems((prev) => prev.map((n) => ({ ...n, is_read: true })));
+    } catch (e) {
+      setError(e.message);
+    }
+  }
+
+  return (
+    <div className="app-feature-page inner-page">
+      <div className="feature-page-header">
+        <div>
+          <span className="feature-eyebrow">Updates</span>
+          <h1>Notifications</h1>
+          <p>
+            Important appointment and prescription updates for your account.
+          </p>
+        </div>
+        <div className="notification-header-actions">
+          <button
+            className="feature-secondary header-action"
+            onClick={load}
+            disabled={loading}
+          >
+            <Icon name="refresh" size={16} />
+            {loading ? "Loading..." : "Refresh"}
+          </button>
+          {counts.UNREAD > 0 && (
+            <button
+              className="feature-primary header-action"
+              onClick={handleReadAll}
+            >
+              <Icon name="check" size={16} />
+              Mark all read
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="feature-filter-row">
+        {[
+          ["ALL", "All", counts.ALL],
+          ["UNREAD", "Unread", counts.UNREAD],
+          ["APPOINTMENTS", "Appointments", counts.APPOINTMENTS],
+          ["PRESCRIPTIONS", "Prescriptions", counts.PRESCRIPTIONS],
+        ].map(([value, label, count]) => (
+          <button
+            key={value}
+            className={filter === value ? "active" : ""}
+            onClick={() => setFilter(value)}
+          >
+            {label}
+            <b>{count}</b>
+          </button>
+        ))}
+      </div>
+
+      {error && (
+        <div className="feature-error">
+          <Icon name="info" size={16} />
+          {error}
+          <button onClick={load}>Try again</button>
+        </div>
+      )}
+
+      <section className="feature-card notification-list-card">
+        {loading ? (
+          <div className="feature-empty loading-state">
+            <span className="loading-spinner" />
+            Loading notifications...
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="feature-empty">
+            <Icon name="bell" size={30} />
+            <strong>
+              {filter === "ALL"
+                ? "You're all caught up."
+                : `No ${filter.toLowerCase()} notifications.`}
+            </strong>
+            <span>
+              {filter === "ALL"
+                ? "New updates will appear here."
+                : "Try a different filter above."}
+            </span>
+          </div>
+        ) : (
+          <div className="notification-list">
+            {filtered.map((n) => {
+              const meta = TYPE_META[n.type] || TYPE_META.general;
+              return (
+                <div
+                  key={n.id}
+                  className={`notification-item ${!n.is_read ? "unread" : ""}`}
+                  onClick={() => handleRead(n)}
+                >
+                  <div className={`notification-badge ${meta.tone}`}>
+                    <Icon name={meta.icon} size={18} />
+                  </div>
+                  <div className="notification-content">
+                    <div className="notification-top-row">
+                      <span className={`notification-type-tag ${meta.tone}`}>
+                        {meta.label}
+                      </span>
+                      <span className="notification-time">
+                        {timeAgo(n.created_at)}
+                      </span>
+                    </div>
+                    <p className="notification-message">{n.message}</p>
+                  </div>
+                  {!n.is_read && <span className="notification-dot" />}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
+    </div>
+  );
 }

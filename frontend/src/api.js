@@ -60,8 +60,17 @@ export const api = {
   // ===== DOCTOR =====
   doctorAppointments: (status) =>
     request(`/doctor/appointments${status ? `?status=${status}` : ""}`),
-    doctorPatientDetail: (patientId) =>
+      doctorPatientDetail: (patientId) =>
     request(`/doctor/patients/${patientId}`),
+
+  // ===== NOTIFICATIONS =====
+  notifications: (limit = 50) =>
+    request(`/notifications?limit=${limit}`),
+  notificationUnreadCount: () => request("/notifications/unread-count"),
+  markNotificationRead: (id) =>
+    request(`/notifications/${id}/read`, { method: "POST" }),
+  markAllNotificationsRead: () =>
+    request("/notifications/read-all", { method: "POST" }),
   savePrescription: (apptId, payload) =>
     request(`/doctor/appointments/${apptId}/prescription`, {
       method: "POST",

@@ -2,6 +2,7 @@ from datetime import datetime
 from flask import Blueprint, request, jsonify
 from flask_login import login_required, current_user
 from database.models import db, Patient, Doctor, Appointment, Token
+from routes.notifications import create_notification
 
 bp = Blueprint("patient", __name__, url_prefix="/api/appointments")
 
@@ -95,6 +96,15 @@ def create_appointment():
     )
     db.session.add(appt)
     db.session.commit()
+
+    # Notify doctor about new request
+    create_notification(
+        doctor.user_id,
+        f"New appointment request from {patient.user.name} on {date_} at {time_}.",
+        "appointment_request",
+    )
+    db.session.commit()
+
     return jsonify(success=True, appointment=appointment_to_dict(appt))
 
 
@@ -156,6 +166,7 @@ def doctor_slots(doctor_id):
     booked_times = [a.appointment_time for a in booked]
     return jsonify(success=True, booked=booked_times)
 
+
 @bp.delete("/<int:appointment_id>")
 @login_required
 def cancel_appointment(appointment_id):
@@ -177,8 +188,22 @@ def cancel_appointment(appointment_id):
             error="Only pending or approved appointments can be cancelled",
         ), 400
 
+    # Save details before status change
+    doctor_user_id = appt.doctor.user_id
+    appt_date = appt.appointment_date
+    appt_time = appt.appointment_time
+
     appt.status = "CANCELLED"
     db.session.commit()
+
+    # Notify doctor about cancellation
+    create_notification(
+        doctor_user_id,
+        f"{patient.user.name} cancelled their appointment on {appt_date} at {appt_time}.",
+        "appointment_cancelled",
+    )
+    db.session.commit()
+
     return jsonify(success=True)
 
 

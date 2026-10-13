@@ -16,7 +16,7 @@ const TABS = {
     ["queue", "Patient Queue", "users"],
     ["patients", "My Patients", "user"],
     ["tokens", "Token Management", "file"],
-    ["navigation", "Hospital Navigation", "map"],   // ✅ FIXED
+    ["navigation", "Hospital Navigation", "map"],
     ["profile", "Profile", "user"],
     ["notifications", "Notifications", "bell"],
   ],
@@ -32,7 +32,14 @@ const TABS = {
   ],
 };
 
-export default function Sidebar({ role, user, tab, setTab, onLogout }) {
+export default function Sidebar({
+  role,
+  user,
+  tab,
+  setTab,
+  onLogout,
+  notificationCount = 0,
+}) {
   const items = TABS[role] || [];
   const initials = (user?.name || "User")
     .split(" ")
@@ -44,8 +51,8 @@ export default function Sidebar({ role, user, tab, setTab, onLogout }) {
     role === "PATIENT"
       ? "Patient"
       : role === "DOCTOR"
-      ? "Doctor"
-      : "System Administrator";
+        ? "Doctor"
+        : "System Administrator";
 
   return (
     <aside className="hospital-sidebar">
@@ -78,6 +85,11 @@ export default function Sidebar({ role, user, tab, setTab, onLogout }) {
           >
             <Icon name={icon} size={19} />
             <span>{label}</span>
+            {id === "notifications" && notificationCount > 0 && (
+              <span className="sidebar-notif-badge">
+                {notificationCount > 99 ? "99+" : notificationCount}
+              </span>
+            )}
           </button>
         ))}
       </nav>

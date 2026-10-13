@@ -1,5 +1,6 @@
 from datetime import datetime, date
 from flask import Blueprint, request, jsonify
+from routes.notifications import create_notification
 from flask_login import login_required, current_user
 from database.models import db, Doctor, Appointment, Token
 from services.token_service import generate_token, call_next
@@ -58,7 +59,18 @@ def approve(appt_id):
     a.status = "APPROVED"
     a.approved_at = datetime.utcnow()
     db.session.commit()
+
+    # Token generate karo
     token = generate_token(a)
+
+    # Notify patient
+    create_notification(
+        a.patient.user_id,
+        f"Your appointment with {doctor.user.name} on {a.appointment_date} at {a.appointment_time} is confirmed. Token: {token.token_number}",
+        "appointment_approved",
+    )
+    db.session.commit()
+
     return jsonify(success=True, status=a.status, token=token.token_number)
 
 
@@ -79,6 +91,16 @@ def reject(appt_id):
     if reason:
         a.notes = f"Rejected: {reason}"
     db.session.commit()
+
+    # Notify patient
+    reason_text = f" Reason: {reason}" if reason else ""
+    create_notification(
+        a.patient.user_id,
+        f"Your appointment with {doctor.user.name} on {a.appointment_date} at {a.appointment_time} was not approved.{reason_text}",
+        "appointment_rejected",
+    )
+    db.session.commit()
+
     return jsonify(success=True, status=a.status)
 
 
@@ -92,6 +114,15 @@ def complete(appt_id):
     a.status = "COMPLETED"
     a.completed_at = datetime.utcnow()
     db.session.commit()
+
+    # Notify patient
+    create_notification(
+        a.patient.user_id,
+        f"Your appointment with {doctor.user.name} on {a.appointment_date} has been completed. Thank you for visiting.",
+        "appointment_completed",
+    )
+    db.session.commit()
+
     return jsonify(success=True, status=a.status)
 
 
@@ -198,7 +229,6 @@ def save_prescription(appt_id):
     data = request.get_json() or {}
     medicines = data.get("medicines") or []
 
-    # Validation
     if not data.get("diagnosis", "").strip():
         return jsonify(success=False, error="Diagnosis is required"), 400
     if not medicines or not any(m.get("name", "").strip() for m in medicines):
@@ -207,6 +237,7 @@ def save_prescription(appt_id):
     from database.models import Prescription
 
     rx = Prescription.query.filter_by(appointment_id=appt_id).first()
+    is_new = False
     if not rx:
         rx = Prescription(
             appointment_id=appt_id,
@@ -214,6 +245,7 @@ def save_prescription(appt_id):
             patient_id=a.patient_id,
         )
         db.session.add(rx)
+        is_new = True
 
     rx.diagnosis = data["diagnosis"].strip()
     rx.medicines = json.dumps([
@@ -230,6 +262,16 @@ def save_prescription(appt_id):
     rx.follow_up_date = (data.get("follow_up_date") or "").strip() or None
 
     db.session.commit()
+
+    # Notify patient only when prescription is NEWLY created (not on every edit)
+    if is_new:
+        create_notification(
+            a.patient.user_id,
+            f"Prescription from {doctor.user.name} is ready for your appointment on {a.appointment_date}. Click to view.",
+            "prescription_ready",
+        )
+        db.session.commit()
+
     return jsonify(success=True, prescription_id=rx.id)
 
 

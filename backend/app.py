@@ -31,6 +31,7 @@ def create_app():
     from routes.admin import bp as admin_bp
     from routes.ai import bp as ai_bp
     from routes.navigation import bp as navigation_bp
+    from routes.notifications import bp as notifications_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(patient_bp)
@@ -38,6 +39,7 @@ def create_app():
     app.register_blueprint(admin_bp)
     app.register_blueprint(ai_bp)
     app.register_blueprint(navigation_bp)
+    app.register_blueprint(notifications_bp)
 
     @app.errorhandler(404)
     def not_found(e):
