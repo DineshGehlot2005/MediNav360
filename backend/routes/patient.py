@@ -180,3 +180,50 @@ def cancel_appointment(appointment_id):
     appt.status = "CANCELLED"
     db.session.commit()
     return jsonify(success=True)
+
+
+import json
+
+
+@bp.get("/<int:appointment_id>/prescription")
+@login_required
+def get_prescription_patient(appointment_id):
+    """Patient reads their own prescription."""
+    patient = require_patient()
+    if not patient:
+        return jsonify(success=False, error="Patient access only"), 403
+
+    a = Appointment.query.filter_by(
+        id=appointment_id, patient_id=patient.id
+    ).first()
+    if not a:
+        return jsonify(success=False, error="Appointment not found"), 404
+
+    from database.models import Prescription
+
+    rx = Prescription.query.filter_by(appointment_id=appointment_id).first()
+    if not rx:
+        return jsonify(success=True, prescription=None)
+
+    try:
+        meds = json.loads(rx.medicines or "[]")
+    except (ValueError, TypeError):
+        meds = []
+
+    return jsonify(
+        success=True,
+        prescription={
+            "id": rx.id,
+            "diagnosis": rx.diagnosis,
+            "medicines": meds,
+            "advice": rx.advice,
+            "follow_up_date": rx.follow_up_date,
+            "created_at": rx.created_at.isoformat() if rx.created_at else None,
+            "doctor_name": rx.doctor.user.name if rx.doctor else None,
+            "doctor_qualification": rx.doctor.qualification if rx.doctor else None,
+            "doctor_specialization": rx.doctor.specialization if rx.doctor else None,
+            "patient_name": patient.user.name,
+            "appointment_date": a.appointment_date,
+            "appointment_time": a.appointment_time,
+        },
+    )

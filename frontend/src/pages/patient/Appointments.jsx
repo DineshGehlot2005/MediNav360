@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { api } from "../../api.js";
 import Icon from "../../components/Icon.jsx";
+import PrescriptionModal from "../../components/PrescriptionModal.jsx";
 
 export default function PatientAppointments() {
   const [appointments, setAppointments] = useState([]);
@@ -9,6 +10,7 @@ export default function PatientAppointments() {
   const [filter, setFilter] = useState("ALL");
   const [cancelling, setCancelling] = useState(null);
   const [showConfirm, setShowConfirm] = useState(null);
+  const [rxModal, setRxModal] = useState(null);
 
   async function load() {
     setLoading(true);
@@ -45,7 +47,7 @@ export default function PatientAppointments() {
       filter === "ALL"
         ? appointments
         : appointments.filter((a) => a.status === filter),
-    [appointments, filter],
+    [appointments, filter]
   );
 
   const counts = {
@@ -144,6 +146,7 @@ export default function PatientAppointments() {
               key={a.id}
               a={a}
               onCancelClick={() => setShowConfirm(a)}
+              onViewPrescription={() => setRxModal(a.id)}
             />
           ))
         )}
@@ -191,12 +194,22 @@ export default function PatientAppointments() {
           </div>
         </div>
       )}
+
+      {/* Prescription View Modal */}
+      {rxModal && (
+        <PrescriptionModal
+          appointmentId={rxModal}
+          mode="view"
+          onClose={() => setRxModal(null)}
+        />
+      )}
     </div>
   );
 }
 
-function AppointmentCard({ a, onCancelClick }) {
+function AppointmentCard({ a, onCancelClick, onViewPrescription }) {
   const canCancel = ["PENDING", "APPROVED"].includes(a.status);
+  const canViewRx = ["APPROVED", "COMPLETED"].includes(a.status);
 
   return (
     <article className="patient-appointment-card">
@@ -243,16 +256,28 @@ function AppointmentCard({ a, onCancelClick }) {
           </div>
         )}
 
-        {canCancel && (
+        {(canCancel || canViewRx) && (
           <div className="appointment-actions">
-            <button
-              type="button"
-              className="cancel-btn"
-              onClick={onCancelClick}
-            >
-              <Icon name="info" size={13} />
-              Cancel Appointment
-            </button>
+            {canViewRx && (
+              <button
+                type="button"
+                className="rx-view-btn"
+                onClick={onViewPrescription}
+              >
+                <Icon name="file" size={13} />
+                View Prescription
+              </button>
+            )}
+            {canCancel && (
+              <button
+                type="button"
+                className="cancel-btn"
+                onClick={onCancelClick}
+              >
+                <Icon name="info" size={13} />
+                Cancel Appointment
+              </button>
+            )}
           </div>
         )}
       </div>

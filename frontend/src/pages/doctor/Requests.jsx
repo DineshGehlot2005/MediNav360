@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import PrescriptionModal from "../../components/PrescriptionModal.jsx";
 import { api } from "../../api.js";
 import Icon from "../../components/Icon.jsx";
 
@@ -27,9 +28,10 @@ export default function DoctorRequests() {
   const [error, setError] = useState("");
   const [selected, setSelected] = useState(null);
   const [toast, setToast] = useState(null);
-  const [rejectModal, setRejectModal] = useState(null); // { id, patient }
+  const [rejectModal, setRejectModal] = useState(null);
+  const [rxModal, setRxModal] = useState(null);
   const [rejectReason, setRejectReason] = useState("");
-  const [confirmApprove, setConfirmApprove] = useState(null); // { id, patient, date, time }
+  const [confirmApprove, setConfirmApprove] = useState(null);
 
   async function refresh() {
     setLoading(true);
@@ -104,7 +106,8 @@ export default function DoctorRequests() {
     () =>
       appointments.filter((a) => {
         const matchesStatus = filter === "ALL" || a.status === filter;
-        const text = `${a.patient || ""} ${a.reason || ""} ${a.date || ""}`.toLowerCase();
+        const text =
+          `${a.patient || ""} ${a.reason || ""} ${a.date || ""}`.toLowerCase();
         return matchesStatus && text.includes(search.toLowerCase());
       }),
     [appointments, filter, search]
@@ -125,7 +128,10 @@ export default function DoctorRequests() {
             <Icon name="calendar" size={24} />
             My Appointments
           </h1>
-          <p>Review only the appointments assigned to you and update their status.</p>
+          <p>
+            Review only the appointments assigned to you and update their
+            status.
+          </p>
         </div>
         <button className="doctor-outline-btn" onClick={refresh}>
           <Icon name="refresh" size={16} /> Refresh
@@ -134,7 +140,6 @@ export default function DoctorRequests() {
 
       {error && <div className="doctor-page-error">{error}</div>}
 
-      {/* Toast */}
       {toast && (
         <div className={`doctor-toast ${toast.type}`}>
           <Icon name={toast.type === "success" ? "check" : "info"} size={16} />
@@ -143,9 +148,17 @@ export default function DoctorRequests() {
       )}
 
       <div className="request-summary-grid">
-        <RequestSummary label="Pending Requests" value={counts.PENDING} tone="orange" />
+        <RequestSummary
+          label="Pending Requests"
+          value={counts.PENDING}
+          tone="orange"
+        />
         <RequestSummary label="Approved" value={counts.APPROVED} tone="green" />
-        <RequestSummary label="Completed" value={counts.COMPLETED} tone="blue" />
+        <RequestSummary
+          label="Completed"
+          value={counts.COMPLETED}
+          tone="blue"
+        />
       </div>
 
       <section className="doctor-panel request-list-panel">
@@ -182,10 +195,15 @@ export default function DoctorRequests() {
         ) : !filtered.length ? (
           <div className="doctor-empty">
             <strong>
-              No {filter === "ALL" ? "appointments" : filter.toLowerCase() + " appointments"}{" "}
+              No{" "}
+              {filter === "ALL"
+                ? "appointments"
+                : filter.toLowerCase() + " appointments"}{" "}
               found.
             </strong>
-            <span>Appointments assigned to your doctor account will appear here.</span>
+            <span>
+              Appointments assigned to your doctor account will appear here.
+            </span>
           </div>
         ) : (
           <div className="request-card-list">
@@ -219,7 +237,10 @@ export default function DoctorRequests() {
                   </div>
                 </div>
                 <div className="request-actions">
-                  <button className="request-view" onClick={() => setSelected(a)}>
+                  <button
+                    className="request-view"
+                    onClick={() => setSelected(a)}
+                  >
                     View
                   </button>
                   {a.status === "PENDING" && (
@@ -250,12 +271,32 @@ export default function DoctorRequests() {
                     </>
                   )}
                   {a.status === "APPROVED" && (
+                    <>
+                      <button
+                        className="request-approve"
+                        disabled={busy === a.id}
+                        onClick={() => doComplete(a.id)}
+                      >
+                        {busy === a.id ? "Saving..." : "Complete"}
+                      </button>
+                      <button
+                        className="request-view"
+                        onClick={() =>
+                          setRxModal({ id: a.id, patient: a.patient })
+                        }
+                      >
+                        💊 Prescription
+                      </button>
+                    </>
+                  )}
+                  {a.status === "COMPLETED" && (
                     <button
-                      className="request-approve"
-                      disabled={busy === a.id}
-                      onClick={() => doComplete(a.id)}
+                      className="request-view"
+                      onClick={() =>
+                        setRxModal({ id: a.id, patient: a.patient })
+                      }
                     >
-                      {busy === a.id ? "Saving..." : "Complete"}
+                      💊 Prescription
                     </button>
                   )}
                 </div>
@@ -267,8 +308,14 @@ export default function DoctorRequests() {
 
       {/* ===== VIEW MODAL ===== */}
       {selected && (
-        <div className="doctor-modal-backdrop" onClick={() => setSelected(null)}>
-          <div className="doctor-modal request-modal" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="doctor-modal-backdrop"
+          onClick={() => setSelected(null)}
+        >
+          <div
+            className="doctor-modal request-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="doctor-modal-header">
               <div>
                 <span>Appointment Details</span>
@@ -317,7 +364,10 @@ export default function DoctorRequests() {
                   <button
                     className="doctor-outline-btn"
                     onClick={() =>
-                      setRejectModal({ id: selected.id, patient: selected.patient })
+                      setRejectModal({
+                        id: selected.id,
+                        patient: selected.patient,
+                      })
                     }
                   >
                     Reject
@@ -332,7 +382,25 @@ export default function DoctorRequests() {
                   Mark Completed
                 </button>
               )}
-              <button className="doctor-outline-btn" onClick={() => setSelected(null)}>
+              {(selected.status === "APPROVED" ||
+                selected.status === "COMPLETED") && (
+                <button
+                  className="doctor-primary-btn"
+                  onClick={() => {
+                    setRxModal({
+                      id: selected.id,
+                      patient: selected.patient,
+                    });
+                    setSelected(null);
+                  }}
+                >
+                  💊 Write Prescription
+                </button>
+              )}
+              <button
+                className="doctor-outline-btn"
+                onClick={() => setSelected(null)}
+              >
                 Close
               </button>
             </div>
@@ -358,8 +426,8 @@ export default function DoctorRequests() {
               <button onClick={() => setConfirmApprove(null)}>×</button>
             </div>
             <p className="modal-description">
-              You are about to approve <strong>{confirmApprove.patient}</strong>'s
-              appointment on <strong>{confirmApprove.date}</strong> at{" "}
+              You are about to approve <strong>{confirmApprove.patient}</strong>
+              's appointment on <strong>{confirmApprove.date}</strong> at{" "}
               <strong>{confirmApprove.time}</strong>. A token will be
               automatically generated.
             </p>
@@ -384,7 +452,10 @@ export default function DoctorRequests() {
 
       {/* ===== REJECT REASON MODAL ===== */}
       {rejectModal && (
-        <div className="doctor-modal-backdrop" onClick={() => setRejectModal(null)}>
+        <div
+          className="doctor-modal-backdrop"
+          onClick={() => setRejectModal(null)}
+        >
           <div
             className="doctor-modal small-modal"
             onClick={(e) => e.stopPropagation()}
@@ -405,8 +476,8 @@ export default function DoctorRequests() {
             </div>
             <p className="modal-description">
               Please provide a reason for rejecting{" "}
-              <strong>{rejectModal.patient}</strong>'s appointment. This helps the
-              patient understand and reschedule.
+              <strong>{rejectModal.patient}</strong>'s appointment. This helps
+              the patient understand and reschedule.
             </p>
             <div className="reject-reason-list">
               {[
@@ -436,7 +507,9 @@ export default function DoctorRequests() {
             <div className="doctor-modal-actions">
               <button
                 className="doctor-outline-btn danger-btn"
-                onClick={() => doReject(rejectModal.id, rejectReason || "No reason provided")}
+                onClick={() =>
+                  doReject(rejectModal.id, rejectReason || "No reason provided")
+                }
                 disabled={busy === rejectModal.id || !rejectReason.trim()}
               >
                 {busy === rejectModal.id ? "Rejecting..." : "Confirm Rejection"}
@@ -453,6 +526,19 @@ export default function DoctorRequests() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* ===== PRESCRIPTION MODAL ===== */}
+      {rxModal && (
+        <PrescriptionModal
+          appointmentId={rxModal.id}
+          mode="edit"
+          onClose={() => setRxModal(null)}
+          onSaved={() => {
+            refresh();
+            showToast("Prescription saved", "success");
+          }}
+        />
       )}
     </div>
   );
