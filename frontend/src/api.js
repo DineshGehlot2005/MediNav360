@@ -1,7 +1,6 @@
-// In development: Vite proxy handles /api → localhost:5000
-// In production: VITE_API_URL points to Render backend
-const API_ORIGIN = import.meta.env.VITE_API_URL || "";
-const BASE = `${API_ORIGIN}/api`;
+// Local dev: Vite proxy handles /api → localhost:5000
+// Production: Vercel rewrite handles /api → Render backend
+const BASE = "/api";
 
 async function request(path, options = {}) {
   const res = await fetch(BASE + path, {
