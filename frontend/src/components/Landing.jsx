@@ -22,20 +22,13 @@ export default function Landing({ onLogin }) {
   });
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const [isProd, setIsProd] = useState(false); // default false — assume dev
+  const [isProd, setIsProd] = useState(true);  // ← Fail-safe: assume production
 
-  // Fetch environment config on mount
-  useEffect(() => {
-    api
-      .getConfig()
-      .then((r) => {
-        setIsProd(r.is_production === true);
-      })
-      .catch(() => {
-        // If config fails, assume development (safer for local)
-        setIsProd(false);
-      });
-  }, []);
+useEffect(() => {
+  api.getConfig()
+    .then((r) => setIsProd(r.is_production === true))
+    .catch(() => setIsProd(true));  // ← Fail → production mode
+}, []);
 
   function update(key, value) {
     setForm((f) => ({ ...f, [key]: value }));

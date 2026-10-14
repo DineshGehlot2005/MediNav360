@@ -2,17 +2,33 @@
 // Production: Vercel rewrite handles /api → Render backend
 const BASE = "/api";
 
-async function request(path, options = {}) {
-  const res = await fetch(BASE + path, {
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    ...options,
-  });
-  const data = await res.json();
-  if (!res.ok || data.success === false) {
-    throw new Error(data.error || "Request failed");
+async function request(path, options = {}, retries = 2) {
+  try {
+    const res = await fetch(BASE + path, {
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      ...options,
+    });
+
+    // If 502/503/504 (backend cold start), retry after delay
+    if ([502, 503, 504].includes(res.status) && retries > 0) {
+      await new Promise((r) => setTimeout(r, 3000)); // 3 sec wait
+      return request(path, options, retries - 1);
+    }
+
+    const data = await res.json();
+    if (!res.ok || data.success === false) {
+      throw new Error(data.error || "Request failed");
+    }
+    return data;
+  } catch (err) {
+    if (retries > 0 && err.name === "TypeError") {
+      // Network error — retry
+      await new Promise((r) => setTimeout(r, 3000));
+      return request(path, options, retries - 1);
+    }
+    throw err;
   }
-  return data;
 }
 
 export const api = {
