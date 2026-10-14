@@ -61,12 +61,10 @@ export const api = {
   // ===== DOCTOR =====
   doctorAppointments: (status) =>
     request(`/doctor/appointments${status ? `?status=${status}` : ""}`),
-      doctorPatientDetail: (patientId) =>
-    request(`/doctor/patients/${patientId}`),
+  doctorPatientDetail: (patientId) => request(`/doctor/patients/${patientId}`),
 
   // ===== NOTIFICATIONS =====
-  notifications: (limit = 50) =>
-    request(`/notifications?limit=${limit}`),
+  notifications: (limit = 50) => request(`/notifications?limit=${limit}`),
   notificationUnreadCount: () => request("/notifications/unread-count"),
   markNotificationRead: (id) =>
     request(`/notifications/${id}/read`, { method: "POST" }),
@@ -130,4 +128,23 @@ export const api = {
     }),
   adminDeleteDepartment: (id) =>
     request(`/admin/departments/${id}`, { method: "DELETE" }),
+
+  adminCreateDoctor: (payload) =>
+    request("/admin/doctors", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+
+      adminCreateDoctor: (payload) =>
+    request("/admin/doctors", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+  adminResetDoctorPassword: (doctorId) =>
+    request(`/admin/doctors/${doctorId}/reset-password`, { method: "POST" }),
+  adminToggleDoctorStatus: (doctorId, active) =>
+    request(`/admin/doctors/${doctorId}/status`, {
+      method: "PUT",
+      body: JSON.stringify({ active }),
+    }),
 };
