@@ -1,10 +1,53 @@
+# ===== Python =====
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+.Python
 venv/
+env/
+.venv/
+*.egg-info/
+
+# ===== Environment =====
 .env
+.env.local
+.env.*.local
+.env.development
+.env.production
+
+# ===== Database =====
 instance/
 *.db
-model/*.pkl
+*.sqlite
+*.sqlite3
+
+# ===== ML Models (agar runtime pe generate hote hain) =====
+# Agar pre-trained chahiye, toh yeh line comment karo:
+# model/*.pkl
+
+# ===== Node / React =====
 node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# ===== Build =====
 dist/
+build/
+.vite/
+
+# ===== IDE =====
+.vscode/
+.idea/
+*.swp
+
+# ===== OS =====
 .DS_Store
+Thumbs.db
+desktop.ini
+
+# ===== Logs =====
+*.log
+logs/
