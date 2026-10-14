@@ -1,6 +1,8 @@
 from datetime import date, timedelta
 from flask import Blueprint, request, jsonify
 from flask_login import login_required, current_user
+import secrets
+import string
 from database.models import db, User, Doctor, Patient, Department, Appointment, Token
 
 bp = Blueprint("admin", __name__, url_prefix="/api/admin")
@@ -206,3 +208,102 @@ def navigation_nodes():
     from database.models import HospitalNode
     rows = HospitalNode.query.order_by(HospitalNode.name.asc()).all()
     return jsonify(success=True, nodes=[n.name for n in rows])
+
+@bp.post("/doctors")
+@login_required
+def add_doctor():
+    if not require_admin():
+        return deny()
+
+    data = request.get_json() or {}
+    name = (data.get("name") or "").strip()
+    email = (data.get("email") or "").strip().lower()
+    phone = (data.get("phone") or "").strip()
+    department_id = data.get("department_id")
+
+    if not name or not email or not phone or not department_id:
+        return jsonify(success=False, error="Name, email, phone, and department are required"), 400
+
+    if User.query.filter_by(email=email).first():
+        return jsonify(success=False, error="Email already registered"), 409
+
+    dept = Department.query.get(department_id)
+    if not dept:
+        return jsonify(success=False, error="Department not found"), 404
+
+    # Auto-generate strong password
+    alphabet = string.ascii_letters + string.digits
+    password = "".join(secrets.choice(alphabet) for _ in range(10))
+
+    def to_int(v, default=None):
+        try:
+            return int(v) if v not in (None, "") else default
+        except (ValueError, TypeError):
+            return default
+
+    u = User(name=name, email=email, phone=phone, role="DOCTOR")
+    u.set_password(password)
+    db.session.add(u)
+    db.session.flush()
+
+    d = Doctor(
+        user_id=u.id,
+        department_id=dept.id,
+        qualification=(data.get("qualification") or "").strip() or None,
+        specialization=(data.get("specialization") or "").strip() or dept.name,
+        experience=to_int(data.get("experience")),
+        room_number=(data.get("room_number") or "").strip() or dept.room,
+        fees=to_int(data.get("fees"), 500),
+        consultation_duration=to_int(data.get("consultation_duration"), 15),
+        bio=(data.get("bio") or "").strip() or None,
+        languages=(data.get("languages") or "").strip() or "Hindi, English",
+        is_available=True,
+    )
+    db.session.add(d)
+    db.session.commit()
+
+    return jsonify(
+        success=True,
+        doctor=doctor_dict(d),
+        credentials={"email": u.email, "password": password},
+    )
+
+@bp.post("/doctors/<int:doctor_id>/reset-password")
+@login_required
+def reset_doctor_password(doctor_id):
+    """Generate a new password for a doctor."""
+    if not require_admin():
+        return deny()
+
+    d = Doctor.query.get_or_404(doctor_id)
+    u = d.user
+
+    # Generate new strong password
+    alphabet = string.ascii_letters + string.digits
+    password = "".join(secrets.choice(alphabet) for _ in range(10))
+    u.set_password(password)
+    db.session.commit()
+
+    return jsonify(
+        success=True,
+        credentials={"email": u.email, "password": password},
+    )
+
+
+@bp.put("/doctors/<int:doctor_id>/status")
+@login_required
+def toggle_doctor_status(doctor_id):
+    """Activate or deactivate a doctor."""
+    if not require_admin():
+        return deny()
+
+    d = Doctor.query.get_or_404(doctor_id)
+    data = request.get_json() or {}
+
+    active = bool(data.get("active", True))
+    u = d.user
+    u.is_active_flag = active
+    d.is_available = active  # Also stop showing in booking
+    db.session.commit()
+
+    return jsonify(success=True, active=u.is_active_flag)

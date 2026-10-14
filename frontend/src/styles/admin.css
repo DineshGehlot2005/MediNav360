@@ -179,3 +179,170 @@
     padding: 9px;
   }
 }
+
+/* ============================================================
+   ADD DOCTOR MODAL
+   ============================================================ */
+
+.admin-header-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.add-doctor-modal {
+  max-width: 720px;
+  max-height: 92vh;
+  overflow-y: auto;
+}
+
+.add-doctor-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.add-doctor-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.add-doctor-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.add-doctor-grid label.full-width {
+  grid-column: 1 / -1;
+}
+
+.add-doctor-grid input,
+.add-doctor-grid select,
+.add-doctor-grid textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #dbe5ef;
+  border-radius: 8px;
+  font: inherit;
+  font-size: 13px;
+  color: #1e293b;
+  background: #fff;
+  outline: none;
+  font-family: inherit;
+  font-weight: 500;
+}
+
+.add-doctor-grid input:focus,
+.add-doctor-grid select:focus,
+.add-doctor-grid textarea:focus {
+  border-color: #6da1e5;
+  box-shadow: 0 0 0 3px rgba(76, 133, 212, 0.1);
+}
+
+.add-doctor-grid textarea {
+  resize: vertical;
+}
+
+/* ===== CREDENTIALS MODAL ===== */
+.credentials-modal {
+  max-width: 520px;
+}
+
+.credentials-box {
+  padding: 16px;
+  background: #f0fdf4;
+  border: 1px solid #a7f3d0;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.credentials-note {
+  margin: 0 0 14px;
+  color: #065f46;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.credential-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #d1fae5;
+  margin-bottom: 10px;
+}
+
+.credential-row:last-child {
+  margin-bottom: 0;
+}
+
+.credential-row small {
+  display: block;
+  color: #64748b;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+
+.credential-row strong {
+  color: #1e293b;
+  font-size: 14px;
+  font-weight: 700;
+  word-break: break-all;
+}
+
+.password-mono {
+  font-family: monospace;
+  letter-spacing: 1px;
+  color: #0f766e;
+}
+
+.copy-btn {
+  padding: 6px 12px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: #475569;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.copy-btn:hover {
+  border-color: #3b82f6;
+  color: #3b82f6;
+  background: #eff6ff;
+}
+
+@media (max-width: 640px) {
+  .add-doctor-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ===== ADMIN ROW ACTIONS ===== */
+.admin-row-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: nowrap;
+}
+
+.admin-row-actions .table-action {
+  font-size: 11px;
+  padding: 5px 9px;
+  margin: 0;
+  white-space: nowrap;
+}
