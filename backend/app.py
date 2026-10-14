@@ -1,6 +1,7 @@
 from flask import Flask, jsonify
 from flask_login import LoginManager
 from flask_cors import CORS
+import os
 
 from config import Config
 from database.models import db, User
@@ -23,7 +24,19 @@ def create_app():
     def unauthorized():
         return jsonify(success=False, error="Login required"), 401
 
-    CORS(app, supports_credentials=True, origins=[app.config["FRONTEND_ORIGIN"]])
+        # CORS — support multiple origins (localhost + production)
+    origins = [
+        o.strip()
+        for o in app.config["FRONTEND_ORIGIN"].split(",")
+        if o.strip()
+    ]
+    CORS(
+        app,
+        supports_credentials=True,
+        origins=origins,
+        allow_headers=["Content-Type", "Authorization"],
+        methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    )
 
     from routes.auth import bp as auth_bp
     from routes.patient import bp as patient_bp
@@ -52,6 +65,8 @@ def create_app():
     return app
 
 
+app = create_app()
+
 if __name__ == "__main__":
-    app = create_app()
-    app.run(debug=True, port=5000)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=False)
